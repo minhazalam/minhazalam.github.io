@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://minhazalam.github.io/data-engineering-portfolio/sitemap.xml

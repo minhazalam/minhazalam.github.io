@@ -1,0 +1,67 @@
+{
+  "levels": {
+    "production": "Production Experience",
+    "working": "Working Knowledge",
+    "exploring": "Exploring"
+  },
+  "categories": [
+    {
+      "id": "languages",
+      "title": "Languages",
+      "items": [
+        { "name": "Python", "level": "production" },
+        { "name": "SQL", "level": "production" },
+        { "name": "PySpark", "level": "production" },
+        { "name": "Spark SQL", "level": "working" }
+      ]
+    },
+    {
+      "id": "cloud",
+      "title": "Cloud",
+      "items": [
+        { "name": "AWS", "level": "production" },
+        { "name": "S3", "level": "production" },
+        { "name": "AWS Glue", "level": "production" },
+        { "name": "AWS Systems Manager", "level": "working" }
+      ]
+    },
+    {
+      "id": "platforms",
+      "title": "Data Platforms",
+      "items": [
+        { "name": "Databricks", "level": "production" },
+        { "name": "Snowflake", "level": "working" },
+        { "name": "dbt", "level": "working" }
+      ]
+    },
+    {
+      "id": "bigdata",
+      "title": "Big Data",
+      "items": [
+        { "name": "Spark", "level": "production" },
+        { "name": "Hadoop", "level": "working" },
+        { "name": "Hive", "level": "working" },
+        { "name": "Kafka", "level": "working" }
+      ]
+    },
+    {
+      "id": "orchestration",
+      "title": "Orchestration",
+      "items": [
+        { "name": "Airflow", "level": "working" },
+        { "name": "Control-M", "level": "working" }
+      ]
+    },
+    {
+      "id": "engineering",
+      "title": "Engineering",
+      "items": [
+        { "name": "Git", "level": "production" },
+        { "name": "Docker", "level": "working" },
+        { "name": "CI/CD", "level": "working" },
+        { "name": "GitHub Actions", "level": "working" },
+        { "name": "AI-assisted Engineering", "level": "exploring" }
+      ]
+    }
+  ]
+}

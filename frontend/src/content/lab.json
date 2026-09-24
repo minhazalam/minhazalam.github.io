@@ -1,0 +1,100 @@
+{
+  "topics": [
+    {
+      "id": "batch",
+      "title": "Batch Processing",
+      "summary": "Processing data in scheduled, bounded chunks — the workhorse of most pipelines.",
+      "visual": "batch",
+      "intro": "A batch job reads a bounded dataset, transforms it, and writes the result. It runs on a schedule: hourly, nightly, weekly.",
+      "sections": [
+        { "h": "Why it looks like this", "b": ["Work is collected first, then processed all at once — high throughput, simple retry semantics.", "Ideal when freshness of minutes is enough and cost per unit of data matters."] },
+        { "h": "Why it matters", "b": ["Almost every warehouse and data lake is fed by batch jobs. Understanding windowing, backfills and idempotency is core data engineering.", "Failures are recoverable by re-running the window — if jobs are idempotent."] },
+        { "h": "How to make it robust", "b": ["Make jobs idempotent: overwrite by partition instead of appending blindly.", "Design windows around the natural grain of the data (event date, not processing time).", "Alert on data freshness and volume anomalies, not just job success."] }
+      ]
+    },
+    {
+      "id": "streaming",
+      "title": "Streaming",
+      "summary": "Processing events continuously as they arrive, with seconds-level latency.",
+      "visual": "streaming",
+      "intro": "Instead of waiting for a window to close, streaming engines process each event (or micro-batch) as it arrives.",
+      "sections": [
+        { "h": "Why it looks like this", "b": ["Data flows continuously through the engine — no fixed start or end.", "Systems like Spark Structured Streaming, Kafka Streams and Flink maintain state across events."] },
+        { "h": "Why it matters", "b": ["Fraud detection, alerting, personalization — anything where waiting an hour loses value.", "Streaming forces you to think about event time vs processing time, watermarks and late data."] },
+        { "h": "How to make it robust", "b": ["Define watermarks for how late data may arrive, and decide where late events go.", "Checkpoint state so a restarted job resumes instead of recomputing.", "Start with micro-batch streaming — most 'real-time' needs are fine at 1–5 minutes."] }
+      ]
+    },
+    {
+      "id": "partitioning",
+      "title": "Partitioning",
+      "summary": "Physically splitting tables so queries and jobs only touch the data they need.",
+      "visual": "partitioning",
+      "intro": "Partitioning stores rows in separate directories (or micro-partitions) based on a key — usually a date. Filters on that key skip entire partitions.",
+      "sections": [
+        { "h": "Why it looks like this", "b": ["Each partition is a self-contained unit: one event_date per directory.", "A query filtering on one day reads one partition instead of the whole table."] },
+        { "h": "Why it matters", "b": ["Partition pruning is the single biggest lever for query speed and cost on large tables.", "Partition-aligned writes also make idempotent reprocessing trivial: overwrite the partition."] },
+        { "h": "How to get it right", "b": ["Partition on what queries actually filter on — event date, not ingestion date, usually.", "Avoid over-partitioning: millions of tiny files kill performance (small-file problem).", "Combine with compaction jobs that merge small files periodically."] }
+      ]
+    },
+    {
+      "id": "skew",
+      "title": "Data Skew",
+      "summary": "When one key holds most of the data, one task does most of the work.",
+      "visual": "skew",
+      "intro": "In a distributed join or groupBy, data is hashed to partitions. If a few keys are dramatically larger than the rest, the tasks holding them become stragglers.",
+      "sections": [
+        { "h": "Why it happens", "b": ["Power-law data: one tenant, one country, one 'null' key dominates.", "Null keys and default values are classic offenders — they all hash to the same partition."] },
+        { "h": "Why it matters", "b": ["The whole stage waits for the slowest task. You pay for 200 executors and use 4.", "Worst case: the skewed task spills to disk or crashes with out-of-memory."] },
+        { "h": "How to mitigate it", "b": ["Salt the skewed keys: append a random suffix and aggregate in two passes.", "Broadcast-join the small side so the big side is never shuffled.", "Isolate hot keys and process them separately, then union the results.", "AQE (adaptive query execution) in Spark 3.x can split skewed partitions automatically."] }
+      ]
+    },
+    {
+      "id": "etl-elt",
+      "title": "ELT vs ETL",
+      "summary": "Transform before load, or load first and transform inside the warehouse?",
+      "visual": "etl-elt",
+      "intro": "ETL transforms data before it lands in the target system. ELT lands raw data first and transforms it where the compute is — typically the warehouse or lakehouse.",
+      "sections": [
+        { "h": "Why it looks like this", "b": ["ETL: extract → transform → load, transformation happens in the pipeline engine.", "ELT: extract → load → transform, using warehouse/lakehouse compute (Snowflake, Databricks SQL, dbt)."] },
+        { "h": "Why it matters", "b": ["ELT keeps raw data available for reprocessing and audits, and pushes compute to elastic, separated engines.", "ETL is still right for sensitive data (mask before loading) and for reducing warehouse cost when transformations are heavy."] },
+        { "h": "How to choose", "b": ["Default to ELT for analytics: raw zone + dbt-style transformation layer.", "Use ETL steps where compliance, PII masking or source-system load demand it.", "Hybrid is normal: mask in-flight, model in-warehouse."] }
+      ]
+    },
+    {
+      "id": "lake-wh",
+      "title": "Data Lake vs Warehouse",
+      "summary": "Two storage philosophies: keep everything cheaply, or model for fast serving.",
+      "visual": "lake-wh",
+      "intro": "A data lake stores raw, schema-flexible files cheaply. A warehouse stores modeled, schema-enforced tables optimized for SQL analytics. Modern lakehouses attempt both.",
+      "sections": [
+        { "h": "Why it looks like this", "b": ["Lake: S3 + Parquet — any format, any schema, low cost, high scale.", "Warehouse: Snowflake — schemas, ACID, columnar micro-partitions, instant SQL compute."] },
+        { "h": "Why it matters", "b": ["The lake is your source of truth and ML training ground; the warehouse is your trusted serving layer.", "Architecture like raw → curated → marts gives you both without duplicating ingests."] },
+        { "h": "How to combine them", "b": ["Land raw in the lake, model with Spark/dbt, serve curated tables from Snowflake or Databricks SQL.", "Enforce schema contracts at the curated boundary — the lake stays flexible, consumers stay safe."] }
+      ]
+    },
+    {
+      "id": "quality",
+      "title": "Data Quality",
+      "summary": "Tests on data: expectations checked automatically, before consumers find the problem.",
+      "visual": "quality",
+      "intro": "Data quality checks validate rows and tables against expectations — not null, unique, in-range, matching a reference — and block or flag failures.",
+      "sections": [
+        { "h": "Why it looks like this", "b": ["Each load passes through assertions: schema match, row counts in expected range, key uniqueness.", "Failures quarantine or block the partition instead of silently flowing downstream."] },
+        { "h": "Why it matters", "b": ["Broken data erodes trust permanently; one bad dashboard makes everyone re-verify everything.", "Quality gates turn silent corruption into a loud, early, fixable failure."] },
+        { "h": "How to implement it", "b": ["Start with dbt tests on staging models: unique/not_null/accepted values on keys and facts.", "Monitor volume and freshness anomalies per table — the cheapest high-signal checks.", "Route failures to owners with the failing rows attached."] }
+      ]
+    },
+    {
+      "id": "scd",
+      "title": "Slowly Changing Dimensions",
+      "summary": "Keeping history when dimension attributes change — who the customer was at order time.",
+      "visual": "scd",
+      "intro": "When a customer changes address or a product changes category, do you overwrite, or keep versions? SCD types answer that question per attribute.",
+      "sections": [
+        { "h": "Why it happens", "b": ["Dimensions change: customers move, products get re-categorized, employees get promoted.", "Facts reference those dimensions — overwriting destroys what was true at transaction time."] },
+        { "h": "Why it matters", "b": ["Type 1 (overwrite) answers 'current state' questions but loses history.", "Type 2 (new row with valid_from / valid_to) lets joins reconstruct point-in-time state — essential for correct historical revenue by segment."] },
+        { "h": "How to implement it", "b": ["Use Type 2 for attributes used in historical analysis; add surrogate keys and is_current flags.", "Automate change detection with merge/upsert logic (dbt snapshots, Delta MERGE).", "Document which attributes are versioned — mixed strategies confuse consumers."] }
+      ]
+    }
+  ]
+}

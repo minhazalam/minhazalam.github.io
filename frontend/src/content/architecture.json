@@ -1,0 +1,64 @@
+{
+  "pipeline": [
+    {
+      "id": "sources",
+      "label": "Sources",
+      "nodes": ["APIs", "Kafka", "S3"],
+      "description": "Where data originates: operational APIs, event streams and external drops.",
+      "why": "Event streams like Kafka decouple producers from consumers and provide replayable, ordered input. Object drops handle bulk sources.",
+      "alternatives": "Point-to-point database extracts, nightly CSV hand-offs over SFTP.",
+      "tradeoffs": "Streaming adds broker infrastructure and schema discipline. Batch is simpler but introduces staleness and makes schema drift someone else's problem.",
+      "code": "# kafka topic as the contract between systems\nconsumer.subscribe([\"orders.events\"])\nfor msg in consumer:\n    event = schema.validate(msg.value)"
+    },
+    {
+      "id": "ingestion",
+      "label": "Ingestion",
+      "nodes": ["Kafka", "AWS Glue", "S3"],
+      "description": "Reliably landing raw data in durable storage, as close to source fidelity as possible.",
+      "why": "Landing raw, immutable data in S3 first means every downstream system can reprocess from source of truth — ingestion failures never lose data.",
+      "alternatives": "Ingesting directly into the warehouse; transforming in-flight during ingestion.",
+      "tradeoffs": "Raw landing adds a storage zone and a copy step, but gives replayability, auditability and cheap reprocessing when logic changes.",
+      "code": "# raw zone: immutable, partitioned by ingest date\ns3://lake/raw/orders/event_date=2025-01-01/"
+    },
+    {
+      "id": "processing",
+      "label": "Processing",
+      "nodes": ["Spark", "PySpark", "Databricks"],
+      "description": "Distributed transformation: cleansing, joins, aggregations at scale.",
+      "why": "Spark scales horizontally across partitions, handles data bigger than any single node's memory, and offers one engine for batch and (with Structured Streaming) near-real-time work.",
+      "alternatives": "Single-node pandas, warehouse-native SQL (Snowflake compute), Athena for lighter jobs.",
+      "tradeoffs": "Spark clusters cost money and need tuning (partitioning, skew handling, memory). For small data it is overkill — pick the smallest tool that scales.",
+      "code": "df = (spark.read.parquet(RAW_PATH)\n    .filter(col(\"event_date\") == run_date)\n    .groupBy(\"customer_id\")\n    .agg(sum(\"revenue\").alias(\"total_revenue\")))"
+    },
+    {
+      "id": "lake",
+      "label": "Data Lake",
+      "nodes": ["S3", "Parquet", "Partitions"],
+      "description": "Columnar, partitioned storage — the durable analytical backbone.",
+      "why": "Parquet on S3 gives cheap storage, column pruning and partition elimination. Partitioning by event date aligns physical layout with query patterns and pipeline reprocessing.",
+      "alternatives": "Warehouse-only storage; row formats like CSV/JSON; HDFS.",
+      "tradeoffs": "Too-fine partitions create small-file problems; unpartitioned tables scan everything. Partition on what queries filter on, not on habit.",
+      "code": "# partition + compact strategy\n(df.repartition(\"event_date\")\n   .write.mode(\"overwrite\")\n   .partitionBy(\"event_date\")\n   .parquet(CURATED_PATH))"
+    },
+    {
+      "id": "platform",
+      "label": "Data Platform",
+      "nodes": ["Databricks", "dbt", "Orchestration"],
+      "description": "Where transformations become modeled, tested, documented datasets.",
+      "why": "dbt brings software engineering to SQL — version control, tests, documentation and lineage — while Databricks provides managed Spark compute and collaboration.",
+      "alternatives": "Stored procedures, hand-written ETL scripts, BI-layer transformations.",
+      "tradeoffs": "A modeling layer adds a build step and conventions. The payoff is maintainability and trust: lineage, tests and docs stop being tribal knowledge.",
+      "code": "-- dbt: model + test in one place\nSELECT\n  customer_id,\n  sum(revenue) AS total_revenue\nFROM {{ ref('stg_orders') }}\nGROUP BY 1"
+    },
+    {
+      "id": "analytics",
+      "label": "Analytics / AI",
+      "nodes": ["Snowflake", "BI", "ML"],
+      "description": "Consumption layer: dashboards, ad-hoc analysis, feature stores and AI products.",
+      "why": "Serving analytics from modeled, quality-checked tables means consumers trust the numbers — and compute is isolated from pipeline workloads.",
+      "alternatives": "Letting analysts query raw zones; feeding ML on unmodeled data.",
+      "tradeoffs": "A curated serving layer needs modeling discipline and change management. Without it, every consumer rebuilds the same logic differently.",
+      "code": "-- mart consumed by BI + AI features\nSELECT customer_id,\n       total_revenue,\n       revenue_tier\nFROM analytics.mart_customer_revenue"
+    }
+  ]
+}

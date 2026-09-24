@@ -1,0 +1,610 @@
+{
+  "note": "Bracketed values are placeholders — confirm metrics and repo names before publishing.",
+  "projects": [
+    {
+      "slug": "formflow-ai",
+      "name": "FormFlow AI",
+      "tagline": "OCR-powered form automation that turns repetitive form filling into a single command.",
+      "tech": ["Python", "OCR", "Tesseract", "Playwright", "AI", "Automation"],
+      "status": null,
+      "featured": true,
+      "github": "https://github.com/minhazalam",
+      "problem": "Repetitive web forms — job applications, vendor onboarding, internal data entry — burn hours on work that follows an identical pattern: read fields, recall known data, type it in, submit. Doing this manually is slow, error-prone and impossible to audit.",
+      "whyItMatters": "The interesting engineering is not 'OCR' — it is building a reliable path from noisy, imperfect extraction to a correct, verifiable submission. That means handling OCR errors, mapping extracted text to form semantics, and never submitting data a human hasn't seen.",
+      "dataFlow": [
+        "Form image or PDF captured",
+        "OCR extraction with Tesseract",
+        "Field detection and text cleanup",
+        "Mapping engine matches OCR output to form fields",
+        "AI-assisted correction on low-confidence fields",
+        "Human confirmation, then automated submission via Playwright"
+      ],
+      "architecture": [
+        {
+          "id": "ocr",
+          "label": "Tesseract OCR",
+          "description": "Converts the form image into raw text with per-word confidence scores.",
+          "why": "Free, local and fast enough for single documents — no per-page cloud cost, no data leaving the machine.",
+          "alternatives": "AWS Textract, Google Document AI.",
+          "tradeoffs": "Cloud OCR is significantly more accurate on messy scans. Tesseract needs preprocessing (thresholding, deskew) but keeps the pipeline free and private."
+        },
+        {
+          "id": "mapping",
+          "label": "Field Mapping Engine",
+          "description": "Deterministic layer that matches extracted tokens to form fields by label proximity and type hints.",
+          "why": "Rules handle the 90% case predictably. A deterministic layer means identical input always yields identical mapping — testable and debuggable.",
+          "alternatives": "Asking an LLM to map everything end-to-end.",
+          "tradeoffs": "Rules are brittle to layout changes; an LLM is flexible but non-deterministic and costs per run. Layering rules first, AI second, gets both."
+        },
+        {
+          "id": "ai",
+          "label": "AI Correction",
+          "description": "Resolves low-confidence fields: fuzzy matching, context-aware fixes, normalization (dates, phone numbers).",
+          "why": "Only uncertain fields go to the AI layer, which bounds cost and keeps the failure surface small.",
+          "alternatives": "Skipping AI entirely and asking the user to fix every miss.",
+          "tradeoffs": "AI corrections must be validated — a confident-looking wrong fix is worse than an obvious gap. Corrections are displayed for confirmation, never submitted blind."
+        },
+        {
+          "id": "agent",
+          "label": "Playwright Agent",
+          "description": "Drives the browser: locates fields, fills values, handles dynamic forms, submits.",
+          "why": "Playwright's auto-waiting and modern selectors make it far more stable than sleep-based Selenium scripts against real-world forms.",
+          "alternatives": "Selenium, direct HTTP request replay.",
+          "tradeoffs": "HTTP replay is faster but breaks on JS-heavy apps and anti-bot flows. Browser automation is slower but honest — it interacts exactly like a user would."
+        }
+      ],
+      "decisions": [
+        {
+          "title": "Why Tesseract instead of cloud OCR APIs?",
+          "decision": "Local OCR keeps the pipeline free per-page and data private — form contents never leave the machine.",
+          "alternatives": "AWS Textract, Google Document AI.",
+          "tradeoffs": "Accepting lower accuracy on poor scans, compensated with preprocessing and an AI correction layer. If volume grew to thousands of pages with messy input, cloud OCR would win on accuracy per engineering-hour."
+        },
+        {
+          "title": "Deterministic mapping first, AI second",
+          "decision": "Rules map what they can; AI only resolves flagged low-confidence fields.",
+          "alternatives": "Full LLM pipeline, or pure rules.",
+          "tradeoffs": "Two layers means two codepaths, but each stays simple, testable and cheap. A full-AI pipeline is unauditable — you cannot unit-test a prompt reliably."
+        },
+        {
+          "title": "Human confirmation as a hard gate",
+          "decision": "The agent prepares the submission but the operator confirms before send, per batch policy.",
+          "alternatives": "Fully autonomous submission.",
+          "tradeoffs": "Adds one click. For anything irreversible (applications, payments), an unattended wrong submission costs far more than a click."
+        }
+      ],
+      "implementation": [
+        "Image preprocessing: grayscale, thresholding, deskew — the cheapest accuracy win in the whole pipeline.",
+        "Per-word OCR with confidence, then spatial grouping into candidate fields.",
+        "Field mapping layer keyed on label text, relative position and input type.",
+        "AI correction pass scoped to low-confidence and unmatched fields only.",
+        "Playwright agent with explicit selectors, auto-wait and per-form retry handling.",
+        "Audit log of every submission: source file, extracted values, corrections, timestamp."
+      ],
+      "challenges": [
+        "OCR quality on screenshots vs scans — different preprocessing strategies per source type.",
+        "Dynamic forms (fields appearing after selections) required event-driven waiting instead of fixed sleeps.",
+        "Keeping the mapping layer maintainable as form layouts varied — solved with per-form config files rather than hardcoded selectors."
+      ],
+      "performance": [
+        "Per-form end-to-end time: [X]s OCR + [X]s automation — [placeholder].",
+        "Manual baseline: [X] min/form vs automated [X] min — [placeholder]."
+      ],
+      "results": [
+        "[Placeholder — forms processed per week / hours saved / error-rate reduction once measured.]",
+        "Pipeline proved the layered approach: deterministic core, AI at the edges, human in the loop."
+      ],
+      "lessons": [
+        "OCR accuracy is a preprocessing problem more than a model problem.",
+        "Never let a probabilistic component make the final, irreversible decision.",
+        "Automation projects live or die on the audit trail — if you can't reconstruct what happened, it isn't production."
+      ]
+    },
+    {
+      "slug": "stackgen-cli",
+      "name": "StackGen CLI",
+      "tagline": "Developer tooling — a Python CLI that bootstraps production-ready data stacks locally, published to PyPI.",
+      "tech": ["Python", "CLI", "PyPI"],
+      "status": "Published",
+      "featured": true,
+      "github": "https://github.com/minhazalam/stackgen",
+      "problem": "Every new production data stack starts with the same hour: create folders, wire up config, add orchestration boilerplate, repeat. StackGen compresses that into one command that bootstraps a production-ready data stack locally — consistent, ready-to-code and reviewed.",
+      "whyItMatters": "Developer tooling is a different engineering discipline from data pipelines — distribution, versioning, UX of the command line, backwards compatibility. Shipping a published package that other people can `pip install` covers that whole surface.",
+      "dataFlow": [
+        "User runs the CLI with a stack and options",
+        "Stack definition resolved (built-in or config)",
+        "Template engine renders files and folders",
+        "Files written, git initialized",
+        "Summary of created structure printed"
+      ],
+      "architecture": [
+        {
+          "id": "cli",
+          "label": "CLI Entry Point",
+          "description": "Argument parsing, command routing, help text — the entire user-facing surface.",
+          "why": "The CLI contract (commands, flags, output) is the product. Everything else is an implementation detail behind it.",
+          "alternatives": "Interactive wizard-only flow, or a web UI.",
+          "tradeoffs": "Flags are faster and scriptable; wizards are friendlier. Keep flags primary with sensible defaults so both work.",
+          "code": "# console entry point in setup/pyproject\n[project.scripts]\nstackgen = \"stackgen.cli:main\""
+        },
+        {
+          "id": "stacks",
+          "label": "Stack Definitions",
+          "description": "Declarative descriptions of what a stack contains: files, templates, dependencies.",
+          "why": "Adding a new stack should be a data change, not a code change.",
+          "alternatives": "Hardcoding each stack as Python logic.",
+          "tradeoffs": "Declarative definitions are less flexible for exotic logic — but flexibility you never use is just complexity."
+        },
+        {
+          "id": "templates",
+          "label": "Template Engine",
+          "description": "Renders project files with project name, options and platform-specific variations.",
+          "why": "Templates keep generated output reviewable — a generated file is text, diffable and debuggable.",
+          "alternatives": "Programmatic file generation.",
+          "tradeoffs": "Template syntax adds a small learning curve but pays for itself in reviewability."
+        },
+        {
+          "id": "pypi",
+          "label": "PyPI Distribution",
+          "description": "Packaged and published so installation is a single pip command.",
+          "why": "A tool nobody can install in 30 seconds doesn't get used. PyPI is the lowest-friction Python distribution channel.",
+          "alternatives": "Git clone + install, Docker image, internal index.",
+          "tradeoffs": "PyPI means published versions are permanent — semver and deprecation discipline become real obligations."
+        }
+      ],
+      "decisions": [
+        {
+          "title": "Pure Python, zero heavy dependencies",
+          "decision": "Keep the dependency footprint minimal so install is fast and conflict-free.",
+          "alternatives": "Rich frameworks with many transitive dependencies.",
+          "tradeoffs": "Less out-of-the-box polish (colored output, spinners) in exchange for a dependency tree you can actually audit."
+        },
+        {
+          "title": "Generate files, don't mutate existing projects",
+          "decision": "StackGen only creates; it never rewrites an existing codebase.",
+          "alternatives": "In-place upgrade/refactor commands.",
+          "tradeoffs": "Refactoring existing projects is a much harder, riskier problem — out of scope for a scaffolding tool. Clear boundary, clear promise."
+        },
+        {
+          "title": "Versioning as a public contract",
+          "decision": "Semantic versioning with a changelog; generated output for a version is stable.",
+          "alternatives": "Crolling 'latest' releases.",
+          "tradeoffs": "Slower to make breaking improvements, but generated projects must keep building — reproducibility is the point."
+        }
+      ],
+      "implementation": [
+        "[Confirm exact command surface — draft example: `stackgen new --stack data-pipeline my-project`.]",
+        "Stack definitions as data files bundled with the package.",
+        "Template rendering with project metadata substitution.",
+        "Packaged via pyproject; published to PyPI; installable with `pip install [package-name]`.",
+        "GitHub Actions workflow for tests and release publishing — [confirm CI details]."
+      ],
+      "challenges": [
+        "Getting cross-platform path handling right (Windows vs POSIX) for generated file trees.",
+        "Designing the CLI so new stacks could be added without touching the core.",
+        "Making `--help` and error messages genuinely useful instead of afterthoughts."
+      ],
+      "performance": [
+        "Scaffold time: [X]s target for a full stack — [placeholder]."
+      ],
+      "results": [
+        "Published on PyPI and installable with a single pip command.",
+        "[Placeholder — download counts, GitHub stars if tracked.]"
+      ],
+      "lessons": [
+        "A CLI is a product: help text, error messages and defaults are engineering, not decoration.",
+        "Distribution is where toy scripts become tools — packaging, semver and CI are the real work.",
+        "Keep the core dumb: data-driven stack definitions beat clever code."
+      ]
+    },
+    {
+      "slug": "aws-data-platform",
+      "name": "AWS Data Engineering Platform",
+      "tagline": "End-to-end cloud data platform: S3 lake, Glue catalog, PySpark processing, partitioned curated zones.",
+      "tech": ["Python", "PySpark", "AWS", "S3", "AWS Glue", "Data Lake"],
+      "status": null,
+      "featured": true,
+      "github": "https://github.com/minhazalam",
+      "problem": "Analytics on raw operational data doesn't scale: queries scan everything, pipelines are fragile, and nobody trusts numbers that can't be traced to a source. The platform needed a durable lake, a catalog and reproducible transformation jobs.",
+      "whyItMatters": "This project demonstrates the core cloud data engineering loop — ingestion zones, cataloging, distributed processing, partition strategy and cost control — using the AWS primitives that production platforms are actually built on.",
+      "dataFlow": [
+        "Source data lands in S3 raw zone (partitioned by ingest date)",
+        "AWS Glue crawler registers tables in the catalog",
+        "PySpark jobs validate and transform raw → curated",
+        "Curated Parquet written partition-by-partition (idempotent overwrite)",
+        "Analytics/BI queries hit curated zone via catalog tables"
+      ],
+      "architecture": [
+        {
+          "id": "raw",
+          "label": "S3 Raw Zone",
+          "description": "Immutable landing area for source data, partitioned by ingest date.",
+          "why": "Every downstream job can be re-run from raw. Storage is the cheapest layer of the stack — durability is worth more than normalization here.",
+          "alternatives": "Landing directly in a database or warehouse.",
+          "tradeoffs": "Raw data duplicates storage, but S3 object storage makes that duplication nearly free compared to the reprocessing flexibility it buys."
+        },
+        {
+          "id": "glue",
+          "label": "AWS Glue Catalog",
+          "description": "Schema registry and table catalog on top of S3.",
+          "why": "The catalog is what turns files in S3 into queryable tables — Athena, EMR and Spark all read through it.",
+          "alternatives": "Hive metastore managed by hand, or no catalog.",
+          "tradeoffs": "Catalog schemas can drift from real data — crawlers and schema checks must run alongside ingestion, not 'when someone notices'."
+        },
+        {
+          "id": "spark",
+          "label": "PySpark Processing",
+          "description": "Distributed validation, cleansing and transformation from raw to curated.",
+          "why": "PySpark handles data beyond single-node memory and integrates with the Glue catalog and S3 partitioning directly.",
+          "alternatives": "Pandas on a big instance, Athena SQL transformations.",
+          "tradeoffs": "Spark adds cluster management complexity. For genuinely small datasets, a single-node tool is cheaper and simpler — the threshold matters.",
+          "code": "raw = spark.read.table(\"raw.orders\")\ncurated = (raw.filter(col(\"event_date\") == run_date)\n    .withColumn(\"revenue\", col(\"price\") * col(\"qty\")))\ncurated.write.mode(\"overwrite\")\n    .partitionBy(\"event_date\")\n    .parquet(CURATED_PATH)"
+        },
+        {
+          "id": "curated",
+          "label": "Curated Zone",
+          "description": "Validated, columnar, partitioned Parquet — the trusted analytical layer.",
+          "why": "Partition-aligned writes make reprocessing idempotent: overwrite event_date=2025-01-01 and nothing else.",
+          "alternatives": "Appending to ever-growing tables.",
+          "tradeoffs": "Overwrite-by-partition requires every job to be deterministic within a partition — non-trivial discipline, worth it."
+        }
+      ],
+      "decisions": [
+        {
+          "title": "Why S3 instead of PostgreSQL as the storage backbone?",
+          "decision": "The lake pattern: cheap durable object storage with open formats, compute decoupled and swappable.",
+          "alternatives": "Storing analytical data in PostgreSQL.",
+          "tradeoffs": "PostgreSQL is excellent for transactional serving but is the wrong tool for petabyte-scale scans and schema-flexible source data. S3 trades per-row query ergonomics for scale-out economics and format freedom."
+        },
+        {
+          "title": "Partition by event date, not ingest date",
+          "decision": "Physical layout matches how consumers filter and how backfills reprocess.",
+          "alternatives": "Partitioning by ingestion timestamp.",
+          "tradeoffs": "Late-arriving events complicate ingest-date partitioning; event-date partitions make 'reload last 7 days' trivial, at the cost of handling late data explicitly."
+        },
+        {
+          "title": "Validate before curate",
+          "decision": "Schema checks, null checks and range checks run as a gate between raw and curated.",
+          "alternatives": "Fixing data quality issues in BI queries after the fact.",
+          "tradeoffs": "Adds a validation stage and possible pipeline delays — but bad rows get quarantined with a reason instead of silently corrupting every dashboard."
+        }
+      ],
+      "implementation": [
+        "S3 bucket layout: raw / curated / rejected zones with lifecycle policies.",
+        "Glue crawlers on a schedule keeping the catalog in sync with raw.",
+        "PySpark jobs parameterized by run date, deployable and testable outside AWS.",
+        "Idempotent partition overwrites for safe re-runs and backfills.",
+        "Data quality gate: schema match, not-null keys, volume-in-expected-range checks.",
+        "Cost controls: lifecycle transitions to infrequent-access tiers for old raw data."
+      ],
+      "challenges": [
+        "Small-file explosion from frequent micro-batch writes — fixed with periodic compaction jobs.",
+        "Catalog schema drift when upstream added columns — handled by explicit schema evolution checks at the quality gate.",
+        "Keeping local dev/test realistic without copying production data — synthetic fixtures per schema."
+      ],
+      "performance": [
+        "Partition pruning reduced scan volume for typical day-scoped queries by [X]% — [placeholder].",
+        "Repartitioning + Parquet cut end-to-end job time from [X] to [Y] — [placeholder]."
+      ],
+      "results": [
+        "Reproducible, partition-idempotent pipeline from raw to curated with a working quality gate.",
+        "[Placeholder — dataset sizes, cost reductions, consumers served once measured.]"
+      ],
+      "lessons": [
+        "Partitioning decisions ripple through everything: query cost, backfills, compaction, monitoring.",
+        "The catalog is a product — treat schema drift as a first-class failure mode.",
+        "Cloud data engineering is 20% transformation code and 80% zones, gates and re-runnability."
+      ]
+    },
+    {
+      "slug": "airbnb-analytics",
+      "name": "Airbnb Analytics",
+      "tagline": "dbt + Snowflake transformation project: raw listings data modeled through staging, intermediate and mart layers with tests and lineage.",
+      "tech": ["SQL", "dbt", "Snowflake", "Data Modeling"],
+      "status": null,
+      "featured": true,
+      "github": "https://github.com/minhazalam",
+      "problem": "A single source table can't answer business questions cleanly — every analyst rewrites the same joins, defines 'active listing' differently, and trusts their own version. The transformation layer needed to be versioned, tested and documented.",
+      "whyItMatters": "This project demonstrates modeling discipline: layered dbt architecture, tested contracts between layers, and documentation with lineage — the difference between a pile of SQL and a data product.",
+      "dataFlow": [
+        "Raw listing, calendar and review data loaded to Snowflake",
+        "Staging models: rename, cast, light cleaning (1:1 with source)",
+        "Intermediate models: joins and reusable business logic",
+        "Mart models: business entities (dimensional, consumer-facing)",
+        "Tests + documentation generate lineage and enforce contracts"
+      ],
+      "architecture": [
+        {
+          "id": "raw",
+          "label": "Snowflake Raw",
+          "description": "Source data landed as-is; dbt reads it through declared sources.",
+          "why": "Declaring sources in dbt makes the boundary between 'loaded data' and 'modeled data' explicit and testable.",
+          "alternatives": "Ad-hoc table references scattered through models.",
+          "tradeoffs": "Source declarations add ceremony, but they give you source freshness tests and a single place to see what feeds the system."
+        },
+        {
+          "id": "staging",
+          "label": "Staging Layer",
+          "description": "One model per source table: renamed columns, correct types, trimmed strings.",
+          "why": "Staging normalizes the mess once, so every downstream model starts from clean, predictable columns.",
+          "alternatives": "Cleaning inline in every mart model.",
+          "tradeoffs": "One extra layer of models — trivial cost next to removing duplicated cleaning logic."
+        },
+        {
+          "id": "intermediate",
+          "label": "Intermediate Layer",
+          "description": "Joins, deduplication and reusable business logic that no consumer should have to repeat.",
+          "why": "Intermediate models encode 'how the business thinks' — price per night windows, availability logic — once, with tests.",
+          "alternatives": "Pushing join logic into marts or into BI tools.",
+          "tradeoffs": "More layers can hide logic; mitigated with naming conventions and a hard rule that marts never join raw sources directly."
+        },
+        {
+          "id": "mart",
+          "label": "Mart Layer",
+          "description": "Consumer-facing dimensional models: listings, hosts, nightly availability facts.",
+          "why": "Marts answer questions, not mirror sources — grain is chosen deliberately, joins are pre-resolved, semantics are documented.",
+          "alternatives": "Exposing staging tables to BI users.",
+          "tradeoffs": "Marts lag upstream changes by one model generation — the price of a stable contract is worth paying."
+        }
+      ],
+      "decisions": [
+        {
+          "title": "ELT in-warehouse instead of external transformation",
+          "decision": "All transformation happens in Snowflake via dbt — no Spark cluster for warehouse-scale SQL.",
+          "alternatives": "Transforming in Spark before loading.",
+          "tradeoffs": "Warehouse compute costs money per query; in exchange, no data movement, no second system to maintain, and SQL that analysts can actually read."
+        },
+        {
+          "title": "Tests as contracts between layers",
+          "decision": "Unique + not-null on keys, accepted values on categoricals, referential integrity across layers.",
+          "alternatives": "Spot-checking results manually.",
+          "tradeoffs": "Tests add build minutes and maintenance. A broken contract caught at build time is still cheaper than a wrong revenue number in a board deck."
+        },
+        {
+          "title": "Documentation and lineage as deliverables",
+          "decision": "Every model carries descriptions; dbt docs generate the lineage graph for consumers.",
+          "alternatives": "README that goes stale in a month.",
+          "tradeoffs": "Description maintenance is real work — but lineage is how new consumers onboard without asking the model author."
+        }
+      ],
+      "implementation": [
+        "Layered project structure: staging → intermediate → marts, enforced by folder and naming conventions.",
+        "Sources declared for raw Snowflake tables with freshness checks.",
+        "Generic tests (unique, not_null, accepted_values) on keys and categoricals at every layer boundary.",
+        "Custom singular tests for business rules — e.g. no calendar record without a listing.",
+        "dbt docs site generated with model descriptions and lineage graph.",
+        "Seeds for reference data; snapshots where row-level history matters."
+      ],
+      "challenges": [
+        "Choosing grain for the availability fact — nightly grain won over listing-grain aggregates because date-scoped questions dominated.",
+        "Handling duplicate source records — deduplicated in intermediate with a documented, deterministic rule.",
+        "Keeping intermediate models from becoming a dumping ground — naming and review discipline."
+      ],
+      "performance": [
+        "Incremental materialization on the largest fact model reduced full-refresh time by [X]% — [placeholder].",
+        "Clustering on [key] improved mart query latency — [placeholder]."
+      ],
+      "results": [
+        "A tested, documented, lineage-tracked transformation layer from raw to marts.",
+        "[Placeholder — number of models/tests, consumers, refresh SLAs.]"
+      ],
+      "lessons": [
+        "Layering is about responsibility, not bureaucracy: staging cleans, intermediate thinks, marts answer.",
+        "Tests are the cheapest trust you can buy in a warehouse.",
+        "Modeling grain decisions are the hard part; everything else is mechanics."
+      ]
+    },
+    {
+      "slug": "hotelos",
+      "name": "HotelOS",
+      "tagline": "AI-powered hotel operating system — booking, operations, guest experience and payments on one platform.",
+      "tech": ["Next.js", "PostgreSQL", "AI", "Product Engineering"],
+      "status": "Building",
+      "featured": true,
+      "github": "https://github.com/minhazalam",
+      "problem": "Hotels run on disconnected tools: a booking engine, a front-desk app, spreadsheets for housekeeping, a payment terminal that talks to nothing. HotelOS unifies those workflows around a single operational core, with AI where it genuinely helps staff rather than replacing them.",
+      "whyItMatters": "This is product engineering: schema design for operational systems, event-driven workflows, and AI features scoped to real staff pain. It demonstrates the data engineering skill set applied to a live product, not just a pipeline.",
+      "dataFlow": [
+        "Booking events enter the system (channel, front desk, OTA)",
+        "Operational state machine updates (room status, tasks, shifts)",
+        "Guest timeline built from booking + service + messaging events",
+        "Payment intents triggered by stay events",
+        "AI layer consumes event history for summaries, forecasts and draft responses"
+      ],
+      "architecture": [
+        {
+          "id": "booking",
+          "label": "Booking Core",
+          "description": "Availability, reservations, rate plans and stay lifecycle as first-class events.",
+          "why": "Everything else derives from the stay lifecycle — modeling it as events (booked, modified, checked-in, extended, cancelled) keeps derived state rebuildable.",
+          "alternatives": "Mutable-only booking tables.",
+          "tradeoffs": "Event-centric modeling is more upfront design than CRUD rows, but 'why is this room blocked?' becomes a query instead of an investigation."
+        },
+        {
+          "id": "ops",
+          "label": "Operations",
+          "description": "Housekeeping and maintenance tasks generated from stay events and room status.",
+          "why": "Task generation is a data problem: stay event → task rules → assignment. No separate 'task brain' needed.",
+          "alternatives": "Manual task boards.",
+          "tradeoffs": "Automated task generation needs a manual override path — staff know reality better than the state machine."
+        },
+        {
+          "id": "guest",
+          "label": "Guest Experience",
+          "description": "Guest timeline and messaging built from all service touchpoints.",
+          "why": "A single timeline per guest (requests, messages, incidents) is the foundation for both good service and AI assistance.",
+          "alternatives": "Fragmented per-tool histories.",
+          "tradeoffs": "Timeline completeness depends on events actually flowing through one core — which is the whole point of the OS."
+        },
+        {
+          "id": "payments",
+          "label": "Payments",
+          "description": "Payment intents tied to stay lifecycle milestones — deposit, balance, incidentals.",
+          "why": "Tying money movement to stay events makes reconciliation a data check rather than a month-end project.",
+          "alternatives": "Standalone payment processing decoupled from stay state.",
+          "tradeoffs": "Payments demand idempotency and careful failure handling — every payment mutation is an event with a unique key."
+        },
+        {
+          "id": "ai",
+          "label": "AI Layer",
+          "description": "Scoped assistants over the event stream: guest-message drafts, shift handover summaries, occupancy forecasts.",
+          "why": "AI works here because the grounding data already exists and is structured — the event stream is the retrieval corpus.",
+          "alternatives": "Generic chatbot over PDFs.",
+          "tradeoffs": "AI features must fail safely: drafts are drafts, forecasts are advisory. Staff confirmation is part of the design, not a limitation."
+        }
+      ],
+      "decisions": [
+        {
+          "title": "PostgreSQL as the single operational store",
+          "decision": "One Postgres instance with a relational core; events and entities in the same database.",
+          "alternatives": "Microservice-per-module with separate stores, or document DB.",
+          "tradeoffs": "A single store sacrifices independent scaling for transactional integrity across booking, ops and payments — the right trade at this scale, revisited when module load profiles actually diverge."
+        },
+        {
+          "title": "Modular monolith over microservices",
+          "decision": "Module boundaries in code, shared runtime — extract a service only when a module's load profile demands it.",
+          "alternatives": "Starting with microservices.",
+          "tradeoffs": "Microservices would make the first six months harder for zero benefit at current scale; modular boundaries keep the extraction path open."
+        },
+        {
+          "title": "AI scoped to drafts and summaries",
+          "decision": "AI generates drafts and summaries over structured events; staff approve everything customer-facing.",
+          "alternatives": "Autonomous AI agents taking actions.",
+          "tradeoffs": "Autonomy would save clicks but risks guest-facing errors that cost trust. Draft-first gets the speed benefit with human accountability."
+        }
+      ],
+      "implementation": [
+        "Next.js application layer with role-scoped views (front desk, housekeeping, manager).",
+        "PostgreSQL schema: stay lifecycle events, room state, tasks, guest timeline, payment intents.",
+        "Event-derived state machines for room status and task generation.",
+        "AI service layer producing message drafts, handover summaries and forecast inputs — [confirm provider and prompts].",
+        "Payments integrated against stay milestones with idempotency keys — [confirm provider]."
+      ],
+      "challenges": [
+        "Modeling stay modifications without losing audit history — solved with event-sourced stay records.",
+        "Keeping AI drafts grounded: only the structured event stream is in context, never free-form guesses.",
+        "Designing payment retry flows that can't double-charge under duplicate events."
+      ],
+      "performance": [
+        "[Placeholder — latency targets for booking flow, AI draft turnaround once measured.]"
+      ],
+      "results": [
+        "Working core: booking → operations → guest timeline flowing through one event model.",
+        "AI-assisted handover summaries and message drafts in active use — [confirm scope]."
+      ],
+      "lessons": [
+        "Operational systems live on state machines and events, not just tables.",
+        "AI adds the most value where the data is already structured — build the event core first.",
+        "Draft-first AI is a product decision that also happens to be the safe engineering decision."
+      ]
+    },
+    {
+      "slug": "advanced-data-platform",
+      "name": "Enterprise Data Platform",
+      "tagline": "Production-grade modern data platform: batch + real-time streaming, lakehouse architecture, analytics engineering and CI/CD.",
+      "tech": ["Spark", "Kafka", "AWS", "Databricks", "Data Quality", "Orchestration"],
+      "status": "In Progress",
+      "featured": false,
+      "github": "https://github.com/minhazalam/enterprise-data-platform",
+      "problem": "Real platforms need both worlds: streaming for freshness, batch for completeness — plus orchestration, quality gates and cost visibility. This project is a deliberate platform build that assembles those pieces into one coherent architecture.",
+      "whyItMatters": "It is the capstone: not a single pipeline but the connective tissue — how streams and batches coexist, how quality is enforced across both, and how orchestration makes the whole thing operable by one engineer.",
+      "dataFlow": [
+        "Producers publish events to Kafka topics (schema-governed)",
+        "Hot path: Spark Structured Streaming micro-batches land recent data",
+        "Cold path: nightly batch jobs reprocess and backfill from raw",
+        "Databricks notebooks/jobs run transformations with Delta tables",
+        "Quality suite validates partitions before promotion",
+        "Orchestrator schedules, retries and alerts across both paths"
+      ],
+      "architecture": [
+        {
+          "id": "kafka",
+          "label": "Kafka Ingestion",
+          "description": "Schema-governed topics as the contract between producing systems and the platform.",
+          "why": "Kafka gives replayable, ordered event flow and decouples producers from the platform's processing tempo.",
+          "alternatives": "Direct S3 drops, database CDC.",
+          "tradeoffs": "Brokers are another system to run and monitor. For event-heavy sources it pays for itself; for batch-only sources, drops remain simpler."
+        },
+        {
+          "id": "streaming",
+          "label": "Streaming Path",
+          "description": "Structured Streaming micro-batches writing recent events continuously.",
+          "why": "Micro-batch streaming gives near-real-time freshness with batch-like retry semantics — the pragmatic 80% case.",
+          "alternatives": "True continuous processing engines.",
+          "tradeoffs": "Micro-batches add seconds of latency; continuous engines reduce that but with operational complexity most use cases don't need.",
+          "code": "stream = (spark.readStream.format(\"kafka\")\n    .option(\"subscribe\", \"events\")\n    .load())\nq = (stream.writeStream\n    .option(\"checkpointLocation\", CHK)\n    .trigger(processingTime=\"1 minute\")\n    .toTable(\"events_recent\"))"
+        },
+        {
+          "id": "batch",
+          "label": "Batch Path",
+          "description": "Scheduled jobs that reprocess partitions completely — the correctness baseline.",
+          "why": "Streams handle freshness; batch recomputation guarantees completeness and lets logic evolve without corrupting history.",
+          "alternatives": "Stream-only architectures.",
+          "tradeoffs": "Running both costs compute. Keeping batch as the correctness baseline means stream bugs are freshness bugs, not truth bugs."
+        },
+        {
+          "id": "quality",
+          "label": "Quality Suite",
+          "description": "Expectation-based validation on every partition before promotion to serving tables.",
+          "why": "With two ingestion paths, the risk of divergent or partial data doubles — automated checks are the only scalable defense.",
+          "alternatives": "Downstream consumers reporting problems.",
+          "tradeoffs": "Checks add latency to promotion and need maintenance. Quarantining bad partitions is still cheaper than rebuilding consumer trust."
+        },
+        {
+          "id": "orchestration",
+          "label": "Orchestration",
+          "description": "DAGs coordinate stream monitoring, batch runs, quality gates and alerts.",
+          "why": "One engineer can operate what one orchestrator can restart. Dependencies, retries and backfills belong in a workflow engine, not in cron scripts.",
+          "alternatives": "Cron + shell scripts, manual runs.",
+          "tradeoffs": "Orchestration adds a learning curve and some rigidity — repaid the first time a 3 AM failure recovers automatically."
+        }
+      ],
+      "decisions": [
+        {
+          "title": "Micro-batch streaming over continuous processing",
+          "decision": "One-minute micro-batches balance freshness against operational simplicity.",
+          "alternatives": "Millisecond continuous processing.",
+          "tradeoffs": "Sub-second freshness is rarely a business requirement outside trading/fraud — and it costs a different class of infrastructure."
+        },
+        {
+          "title": "Batch as the correctness baseline",
+          "decision": "Nightly reprocessing defines truth; the stream only provides freshness.",
+          "alternatives": "Trusting the stream as primary truth.",
+          "tradeoffs": "Doubles some compute and requires reconciling the two paths — but 'the dashboard is eventually corrected' beats 'the dashboard is eventually right'."
+        },
+        {
+          "title": "Promotion gated on quality, not on schedule",
+          "decision": "Serving tables update only after their partition passes checks.",
+          "alternatives": "Writing directly to serving tables and patching later.",
+          "tradeoffs": "Adds promotion latency per partition. A late-but-correct table preserves more trust than an early-but-broken one."
+        }
+      ],
+      "implementation": [
+        "Kafka topics with schema registry discipline; producers versioned against schemas.",
+        "Structured Streaming jobs with checkpointing and idempotent sink writes.",
+        "Batch jobs parameterized by partition, safe to re-run for any window.",
+        "Delta tables on Databricks as the processing substrate (MERGE for upserts, time travel for debugging).",
+        "Quality suite: schema, volume, freshness and business-rule expectations wired into promotion.",
+        "Orchestrated DAGs with alerting on SLA miss, not just failure."
+      ],
+      "challenges": [
+        "Reconciling stream-written rows with batch-recomputed rows for the same window.",
+        "Keeping checkpoint state valid across job code changes — a schema change is a migration, not a deploy.",
+        "Right-sizing clusters for a mixed stream/batch workload without paying for idle capacity."
+      ],
+      "performance": [
+        "End-to-end streaming latency: [X]s target at [X] events/s — [placeholder].",
+        "Batch window: [X] min for [X] GB reprocessed — [placeholder]."
+      ],
+      "results": [
+        "Platform-in-progress demonstrating dual-path ingestion, governed quality and single-engineer operability.",
+        "[Placeholder — once live: uptime, SLA adherence, cost per TB processed.]"
+      ],
+      "lessons": [
+        "Streams buy freshness; batch buys correctness — design for both from day one.",
+        "In a dual-path platform, quality gates are what keep the paths honest.",
+        "Operability is a feature: if one engineer can't restart it at 3 AM, it's not done."
+      ]
+    }
+  ]
+}

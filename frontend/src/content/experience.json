@@ -1,0 +1,32 @@
+{
+  "note": "Dates and bracketed values are placeholders — confirm before publishing.",
+  "roles": [
+    {
+      "company": "Accenture",
+      "title": "Senior Software Engineer — Data Engineering",
+      "period": "[Start Year] — Present",
+      "current": true,
+      "location": "[Location]",
+      "overview": "Building and operating data pipelines and platform components for large-scale enterprise data. Working across ingestion, distributed processing with Spark/PySpark, orchestration and cloud data infrastructure on AWS.",
+      "technologies": ["Python", "SQL", "PySpark", "Spark", "AWS", "Databricks", "Data Pipelines", "Orchestration"],
+      "impact": [
+        "Designed and maintained data pipelines supporting [business domain].",
+        "Reduced processing time by [X]% through [optimization — e.g. partitioning / broadcast joins / caching].",
+        "Automated [workflow name] workflow, replacing [manual process].",
+        "[Placeholder — add 1–2 further measurable outcomes.]"
+      ]
+    },
+    {
+      "company": "Oracle",
+      "title": "[Role Title]",
+      "period": "[Start Year] — [End Year]",
+      "current": false,
+      "location": "[Location]",
+      "overview": "[Placeholder — 1–2 sentences on the team, product area and type of data work.]",
+      "technologies": ["SQL", "Python", "[Add stack]"],
+      "impact": [
+        "[Placeholder — add 2–3 measurable outcomes, e.g. datasets owned, performance improvements, automations introduced.]"
+      ]
+    }
+  ]
+}

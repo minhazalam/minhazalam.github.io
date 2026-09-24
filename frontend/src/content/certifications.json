@@ -1,0 +1,13 @@
+{
+  "note": "Certification level, date and credential ID are placeholders — confirm before publishing.",
+  "certifications": [
+    {
+      "name": "Databricks Certified Data Engineer — Associate",
+      "issuer": "Databricks",
+      "date": "[Month Year]",
+      "credentialId": "[Credential ID]",
+      "verifyUrl": "",
+      "note": "Confirm exact certification level before publishing."
+    }
+  ]
+}

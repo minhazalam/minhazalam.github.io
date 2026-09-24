@@ -1,0 +1,93 @@
+{
+  "theme": "dark",
+  "typography": {
+    "headings": "Cabinet Grotesk, sans-serif",
+    "body": "Inter, sans-serif",
+    "monospace": "JetBrains Mono, monospace",
+    "instructions": "Use Cabinet Grotesk (or another premium geometric sans like General Sans/Outfit) for strong, confident headlines with tight tracking (tracking-tighter). Use Inter for highly legible body text. Use JetBrains Mono for overlines, technical labels, architecture nodes, and tech stack tags. AVOID Inter for headings."
+  },
+  "colors": {
+    "background": "#0A0A0A",
+    "surface": "#121212",
+    "surface_hover": "#1A1A1A",
+    "text_primary": "#FAFAFA",
+    "text_secondary": "#A3A3A3",
+    "accent": "#00E5FF",
+    "border": "#262626",
+    "instructions": "Vercel/Linear dark aesthetic. Pure black is strictly banned; use #0A0A0A as the base. Structure the UI with 1px subtle borders (#262626). The accent color (cyan) is highly restrained—use it ONLY for active data flow particles, hover glows, and terminal/code highlights to maintain a serious engineering vibe."
+  },
+  "visual_enhancers": {
+    "noise": "Apply a subtle SVG noise/grain overlay (opacity 0.02 to 0.04) fixed over the entire viewport to give a tactile, premium texture.",
+    "grid": "Use a subtle 1px grid line background (rgba(255,255,255,0.03)) to mimic engineering/math paper without distracting from content.",
+    "glassmorphism": "Used only for floating sticky elements like the navigation bar. Formula: backdrop-blur-xl bg-[#0A0A0A]/70 border-b border-white/10. NEVER use fully transparent backgrounds for nav.",
+    "hover_effects": "Cards should use a crisp 1px border shift on hover (e.g., border-white/20) and a very subtle inner glow. Avoid muddy drop shadows in dark mode."
+  },
+  "motion": {
+    "lenis": "Implement Lenis smooth scrolling globally for a premium, weighty momentum feel.",
+    "hero_reveal": "Masked line-by-line text reveal on load using framer-motion. Staggered reveal of H1, subtext, and CTA buttons.",
+    "scroll_animations": "Staggered fade-up reveals for sections and bento grid cards when they intersect the viewport.",
+    "marquee": "One slow, smooth editorial marquee for the technology stack. Use react-fast-marquee or framer-motion. Style as text-transparent stroke-white/20 with large typography.",
+    "pipeline_animation": "Subtle animated data-flow visualization. Use framer-motion to trace SVG paths with glowing cyan dots representing data moving from Sources -> Ingestion -> Processing -> Data Lake.",
+    "reduced_motion": "Wrap animations in a check for prefers-reduced-motion to ensure accessibility."
+  },
+  "components": [
+    {
+      "name": "Hero Section",
+      "instructions": "Large confident typography. H1 fluid sizing (clamp(3rem, 8vw, 6rem)). Layout: Text on the left (col-span-7), Data Flow Canvas on the right (col-span-5). Include two CTAs: 'Explore My Work' (primary, sharp/pill) and 'View Resume' (secondary/outline)."
+    },
+    {
+      "name": "Data Flow Canvas (Visualization)",
+      "instructions": "Animated pipeline showing Sources -> Ingestion -> Processing -> Data Lake -> Platform -> Analytics/AI. Nodes should be labeled with monospace font (Kafka, S3, Spark, Databricks, Snowflake, dbt). Glowing cyan particles flow through connecting SVG lines."
+    },
+    {
+      "name": "Sticky Nav",
+      "instructions": "Fixed at top, z-50, glassmorphism background. Logo (Minhaz Alam) left, nav links center, Resume CTA right. Include Recruiter Mode toggle."
+    },
+    {
+      "name": "Credibility Stat Band",
+      "instructions": "Full width, subtle top/bottom border. 3-4 key metrics (e.g., PB of data processed, Uptime, Pipelines built) using monospace counters."
+    },
+    {
+      "name": "Case Study Cards",
+      "instructions": "Linear-style project cards. Flat background, 1px border. Hover state lifts the card slightly and highlights the border. Include tech stack tags in monospace."
+    },
+    {
+      "name": "Interactive Architecture Viewer",
+      "instructions": "A split pane or modal layout. Clickable architecture diagram nodes. When a node is clicked, the side pane displays 'Why this?', 'Alternatives considered', and 'Tradeoffs'."
+    },
+    {
+      "name": "Skills Bento Grid",
+      "instructions": "Bento layout categorizing skills (Languages, Cloud, Processing, DW). Dense spacing (gap-4). High contrast layout mimicking a modern data dashboard."
+    },
+    {
+      "name": "Interactive Playgrounds",
+      "instructions": "Include a SQL playground / PySpark demo section. Terminal-like UI with a dark background, syntax highlighting, and a 'Run' button simulating data output."
+    }
+  ],
+  "grids_and_layouts": {
+    "hero": "grid-cols-1 lg:grid-cols-12 gap-8.",
+    "bento": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 or gap-6 for tight, dashboard-like density.",
+    "spacing": "Generous vertical rhythm. Use py-24 or py-32 between major sections to let the content breathe."
+  },
+  "libraries": {
+    "animation": "framer-motion",
+    "scrolling": "@studio-freight/lenis (or lenis)",
+    "icons": "lucide-react, react-icons (for brand logos like AWS, Snowflake, Python, Databricks)",
+    "ui_components": "shadcn/ui primitives customized for the dark linear aesthetic"
+  },
+  "accessibility": {
+    "contrast": "Ensure primary text (#FAFAFA) and secondary text (#A3A3A3) meet WCAG AA/AAA against #0A0A0A background.",
+    "testing": "All interactive and key informational elements MUST include a `data-testid` attribute (e.g., data-testid='hero-cta-explore')."
+  },
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You MUST NOT apply universal transition. Eg: transition: all.",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file.",
+    "Do not use transparent backgrounds for dropdowns, floating headers, or overlays.",
+    "Prioritize using pre-existing components from src/components/ui when applicable. Customize them to fit the Linear/Vercel dark theme (remove heavy shadows, use crisp 1px borders).",
+    "Create depth through layered design elements with z-index hierarchy and subtle border opacities.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Every interaction needs micro-animations - hover states, transitions, and entrance animations.",
+    "Include data-testid on every interactive element (buttons, links, form inputs).",
+    "Ensure the application strictly follows a dark-mode only or dark-default theme as requested by the user."
+  ]
+}
