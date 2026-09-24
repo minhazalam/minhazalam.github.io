@@ -12,7 +12,7 @@ yarn install
 yarn start
 ```
 
-Open http://localhost:3000. The app uses hash-based routes so project pages also work on static hosting.
+Open http://localhost:3000. The app uses hash-based routes so project pages work at https://minhazalam.github.io/ on static hosting.
 
 ## Deploy with GitHub Pages
 
