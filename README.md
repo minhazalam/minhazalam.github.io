@@ -1,6 +1,6 @@
 # Minhaz Alam — Data Engineering Portfolio
 
-A minimal static portfolio highlighting selected data engineering repositories. Project code and detailed documentation live on GitHub.
+A static, single-page portfolio that presents a data engineering career as a pipeline: Source → Ingest → Transform → Gold → Serve → Output. No backend or writable storage is used.
 
 ## Run locally
 
@@ -14,15 +14,15 @@ yarn start
 
 ## Deploy
 
-The `Deploy to GitHub Pages` workflow builds and publishes the React app to [minhazalam.github.io](https://minhazalam.github.io/) on each push to `main`.
+The `Deploy to GitHub Pages` workflow builds the production site from `main` at [minhazalam.github.io](https://minhazalam.github.io/) and the exploration branch at `/preview/`.
 
 ## Content
 
-- `frontend/src/content/projects.json` lists the selected data engineering and preparation repositories.
-- `frontend/src/content/profile.json` contains the short introduction and contact links.
-- `frontend/src/content/certifications.json` contains credentials and their verification URLs.
-- `frontend/src/content/writing.json` contains article metadata and content. Add topic tags such as `Spark`, `SQL`, `AWS`, `dbt`, or `Optimization`; GitHub stores the content and each push republishes the static site.
+- `frontend/src/content/careerPipeline.json` holds editable copy for the career stages.
+- `frontend/src/content/projects.json` lists selected repositories and their visual architecture stages.
+- `frontend/src/content/profile.json` contains the name, focus, skills, and contact links.
+- `frontend/src/content/certifications.json` contains credentials and verification URLs.
 
-The `/recruiter` view is a short introduction to skills, selected repositories, and verified credentials. The notes page links to the preparation repository; generated sample articles are not published. Keep future notes in your own words in that repository, then curate a few for the site.
+Full project documentation and future authored notes belong in their GitHub repositories. Only selected project links appear on the portfolio.
 
-The `feature/data-pipeline-design` branch deploys a design preview under `/preview/`; the production homepage remains built from `main`.
+The `feature/data-pipeline-design` branch deploys a design preview under `/preview/`; the production homepage is built from `main`.
