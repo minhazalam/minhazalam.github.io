@@ -1,27 +1,29 @@
 # Portfolio frontend
 
-Static, single-page React site deployed to GitHub Pages. The page follows a pipeline from Source to Output. There is no backend or writable storage.
+Static, single-page React portfolio for selected data engineering projects, experience, and verified credentials. The design keeps pipeline diagrams scoped to systems whose architecture is documented in their own repositories; the portfolio does not label résumé sections as pipeline stages.
 
 ## Local development
+
+Requirements: Node.js 20 and Yarn 1.
 
 ```bash
 yarn install --frozen-lockfile
 yarn start
-yarn build
 ```
+
+Create a production build with `yarn build`.
 
 ## Update content
 
-- `src/content/projects.json`: selected data engineering projects and the preparation repository. Each card links directly to its GitHub repository.
-- `src/content/profile.json`: short bio and social links.
-- `src/content/certifications.json`: certification name, issuer, and verification URL.
-- `src/content/careerPipeline.json`: copy, sequence, and metadata for Source, Ingest, Transform, Serve, and Output.
-- `src/content/projects.json`: includes each project's compact architecture sequence; the UI renders it as lineage.
+- `src/content/profile.json` — short bio, skills, and contact links.
+- `src/content/projects.json` — selected repository links and technology tags.
+- `src/content/experience.json` — role summary.
+- `src/content/certifications.json` — credential names and verification URLs.
 
-The data files stay separate from the UI components. Keep project stages and career copy factual and concise. The site intentionally leaves out unverified education details and placeholder job dates.
+Keep copy brief and factual. Add a pipeline diagram only after checking the project repository's documentation. The portfolio does not automatically publish interview-preparation notes.
 
-Future personal notes should be authored as Markdown in the preparation repository. A small curated index can later let the static site fetch only selected notes; the full repository should not be listed automatically.
+## Hosting
 
-The design preview is built from the `feature/data-pipeline-design` branch and published at `/preview/`. The production root is built from `main`.
+GitHub Pages serves production from `main` and the design preview from `feature/data-pipeline-design` under `/preview/`.
 
-The GitHub Pages workflow runs on pushes to `main` and deploys the production build.
+The site has no analytics or visitor counter.

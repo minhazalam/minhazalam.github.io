@@ -12,7 +12,6 @@
         "Databricks",
         "AWS"
       ],
-      "architecture": ["Batch + streams", "Kafka", "Spark", "Lakehouse", "Analytics"],
       "github": "https://github.com/minhazalam/enterprise-data-platform"
     },
     {
@@ -26,7 +25,6 @@
         "Spark",
         "System Design"
       ],
-      "architecture": ["SQL + Python", "Spark + systems", "Topic notes", "Interview prep"],
       "github": "https://github.com/minhazalam/data-engineering-interview-prep"
     },
     {
@@ -39,7 +37,6 @@
         "dbt",
         "Snowflake"
       ],
-      "architecture": ["SQL models", "dbt", "Snowflake", "Analytics"],
       "github": "https://github.com/minhazalam/snowflake-dbt-analytics-pipeline"
     }
   ]

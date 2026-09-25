@@ -1,7 +1,5 @@
-import { useEffect } from "react";
 import "@/App.css";
 import { ContentProvider, useContent } from "@/context/ContentContext";
-import { trackPageview } from "@/lib/analytics";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -30,8 +28,6 @@ function ContentGate({ children }) {
 }
 
 function Shell() {
-  useEffect(() => { trackPageview("/"); }, []);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       {process.env.REACT_APP_DEPLOY_TARGET === "preview" && (

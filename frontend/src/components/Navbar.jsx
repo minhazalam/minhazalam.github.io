@@ -1,42 +1,20 @@
-import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useContent } from "@/context/ContentContext";
 
-const STAGES = [
-  ["source", "Source"],
-  ["ingest", "Ingest"],
-  ["transform", "Transform"],
-  ["gold", "Gold"],
-  ["serve", "Serve"],
-  ["output", "Output"],
-];
+const LINKS = [["work", "Work"], ["experience", "Experience"], ["certifications", "Certifications"], ["contact", "Contact"]];
 
 export default function Navbar() {
-  const [active, setActive] = useState("source");
-
-  useEffect(() => {
-    const targets = STAGES.map(([id]) => document.getElementById(id)).filter(Boolean);
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-      if (visible[0]) setActive(visible[0].target.id);
-    }, { rootMargin: "-20% 0px -60% 0px", threshold: [0, 0.15, 0.35, 0.6] });
-    targets.forEach((target) => observer.observe(target));
-    return () => observer.disconnect();
-  }, []);
-
+  const { content } = useContent();
   return (
-    <header className="pipeline-nav">
-      <div className="pipeline-nav-inner">
+    <header className="portfolio-nav">
+      <div className="portfolio-nav-inner">
         <a href="#top" className="pipeline-brand" aria-label="Minhaz Alam, back to top">
-          <span>MINHAZ ALAM</span><span className="pipeline-brand-divider">/</span><span>DATA ENGINEER</span>
+          <span>{content.profile.shortName}</span><span className="pipeline-brand-divider">/</span><span>DATA ENGINEER</span>
         </a>
-        <nav className="pipeline-nav-stages" aria-label="Career pipeline">
-          {STAGES.map(([id, label], index) => (
-            <a key={id} href={`#${id}`} aria-current={active === id ? "location" : undefined} className={`pipeline-nav-link ${active === id ? "is-active" : ""}`}>
-              <span>{String(index).padStart(2, "0")}</span>{label}
-            </a>
-          ))}
+        <nav className="portfolio-nav-links" aria-label="Main navigation">
+          {LINKS.map(([id, label]) => <a key={id} href={`#${id}`} className="portfolio-nav-link">{label}</a>)}
         </nav>
-        <a className="pipeline-nav-github" href="https://github.com/minhazalam" target="_blank" rel="noreferrer">
+        <a className="pipeline-nav-github" href={content.profile.github} target="_blank" rel="noreferrer" aria-label="GitHub profile">
           GITHUB <ArrowUpRight size={12} />
         </a>
       </div>
