@@ -14,7 +14,7 @@ yarn start
 
 ## Deploy
 
-GitHub Pages deploys the production site from `main` to [minhazalam.github.io](https://minhazalam.github.io/). The design preview is built from `feature/data-pipeline-design` and published at `/preview/`.
+GitHub Pages deploys the production site from `main` to [minhazalam.github.io](https://minhazalam.github.io/). The development preview is built from `dev` and published at `/preview/`. Work on `feature/*` branches, merge to `dev` to review the preview, then merge approved changes to `main`.
 
 ## Content
 
@@ -22,6 +22,8 @@ GitHub Pages deploys the production site from `main` to [minhazalam.github.io](h
 - `frontend/src/content/projects.json` — selected repository cards and technology tags.
 - `frontend/src/content/experience.json` — role summary.
 - `frontend/src/content/certifications.json` — credential names and verification links.
+
+The two featured repositories have concise overview pages linked from the homepage. Their stated scope and repository folders come from their public GitHub descriptions and tree; detailed implementation claims should be added only when the source repositories document them.
 
 ## Selected writing
 

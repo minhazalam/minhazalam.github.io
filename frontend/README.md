@@ -41,6 +41,8 @@ Keep copy brief and factual. Add a pipeline diagram only after checking the proj
 
 ## Hosting
 
-GitHub Pages serves production from `main` and the design preview from `feature/data-pipeline-design` under `/preview/`.
+GitHub Pages serves production from `main` and the development preview from `dev` under `/preview/`. Use `feature/*` branches for changes, merge them into `dev` to preview, then merge approved work into `main`.
+
+The selected data platform and interview preparation repositories have minimal overview pages under `/projects/<slug>/`. Their scope and folder links are maintained with the project entries in `src/content/projects.json`.
 
 The site has no analytics or visitor counter.

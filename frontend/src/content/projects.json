@@ -12,7 +12,12 @@
         "Databricks",
         "AWS"
       ],
-      "github": "https://github.com/minhazalam/enterprise-data-platform"
+      "github": "https://github.com/minhazalam/enterprise-data-platform",
+      "details": {
+        "summary": "Production-grade modern data platform demonstrating batch processing, real-time streaming, lakehouse architecture, analytics engineering, CI/CD, and AI-ready data pipelines.",
+        "focusAreas": ["Batch processing", "Real-time streaming", "Lakehouse architecture", "Analytics engineering", "CI/CD", "AI-ready pipelines"],
+        "repoAreas": ["configs", "datasets", "docker", "docs", "notebooks", "scripts", "src", "tests"]
+      }
     },
     {
       "slug": "data-engineering-interview-prep",
@@ -25,7 +30,12 @@
         "Spark",
         "System Design"
       ],
-      "github": "https://github.com/minhazalam/data-engineering-interview-prep"
+      "github": "https://github.com/minhazalam/data-engineering-interview-prep",
+      "details": {
+        "summary": "A structured preparation repository for data engineering interviews, with topic folders for technical practice, production scenarios, and interview preparation.",
+        "focusAreas": ["SQL", "Python", "DSA", "Spark", "System design", "Production scenarios", "Behavioral interviews"],
+        "repoAreas": ["behavioral", "cheatsheets", "dsa", "mock-interviews", "production-scenarios", "production-scenarios/spark", "python", "resume", "sql", "system-design", "templates"]
+      }
     },
     {
       "slug": "snowflake-dbt-analytics-pipeline",
