@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, codex/minimal-redesign]
   workflow_dispatch:
 
 permissions:
@@ -19,19 +19,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/minimal-redesign
+          path: preview
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: yarn
-          cache-dependency-path: frontend/yarn.lock
-      - name: Install and build
-        working-directory: frontend
+          cache-dependency-path: production/frontend/yarn.lock
+      - name: Build production site from main
+        working-directory: production/frontend
+        env:
+          PUBLIC_URL: .
         run: |
           corepack yarn install --frozen-lockfile
-          PUBLIC_URL=. corepack yarn build
+          corepack yarn build
+      - name: Build development preview
+        working-directory: preview/frontend
+        env:
+          PUBLIC_URL: /preview
+          REACT_APP_DEPLOY_TARGET: preview
+        run: |
+          corepack yarn install --frozen-lockfile
+          corepack yarn build
+      - name: Combine production and preview sites
+        run: |
+          mkdir -p production/frontend/build/preview
+          cp -R preview/frontend/build/. production/frontend/build/preview/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/build
+          path: production/frontend/build
 
   deploy:
     needs: build
