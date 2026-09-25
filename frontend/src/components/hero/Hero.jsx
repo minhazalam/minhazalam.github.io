@@ -11,7 +11,7 @@ export default function Hero() {
         <div className="max-w-3xl">
           <p className="font-mono text-xs tracking-[0.2em] text-accent">{profile.name.toUpperCase()} <span className="text-mute/60">/</span> DATA ENGINEER</p>
           <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] tracking-tight text-ink sm:text-5xl md:text-6xl">
-            Data platforms, built for the real world.
+            Reliable data platforms for real-world workloads.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-mute md:text-lg">{profile.subline}</p>
           <a href="#work" className="mt-8 inline-flex items-center gap-2 font-mono text-xs tracking-wider text-accent transition-colors hover:text-ink focus-visible:text-ink">
