@@ -63,7 +63,8 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
+    "prebuild": "node scripts/sync-writing.mjs",
+    "build": "craco build && node scripts/create-static-routes.mjs",
     "test": "craco test"
   },
   "browserslist": {

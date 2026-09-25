@@ -28,18 +28,6 @@
       "github": "https://github.com/minhazalam/data-engineering-interview-prep"
     },
     {
-      "slug": "stackgen",
-      "name": "StackGen",
-      "category": "DEVELOPER TOOLING",
-      "tagline": "A Python CLI for bootstrapping production-ready data engineering projects.",
-      "tech": [
-        "Python",
-        "CLI",
-        "Data Engineering"
-      ],
-      "github": "https://github.com/minhazalam/stackgen"
-    },
-    {
       "slug": "snowflake-dbt-analytics-pipeline",
       "name": "Snowflake + dbt Analytics",
       "category": "ANALYTICS ENGINEERING",

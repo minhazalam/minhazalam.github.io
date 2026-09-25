@@ -1,24 +1,46 @@
 # Portfolio frontend
 
-Static React site deployed to GitHub Pages. It has no backend or writable storage. Project details and source code are linked from public GitHub repositories.
+Static, single-page React portfolio for selected data engineering projects, experience, and verified credentials. The design keeps pipeline diagrams scoped to systems whose architecture is documented in their own repositories; the portfolio does not label résumé sections as pipeline stages.
 
 ## Local development
+
+Requirements: Node.js 20 and Yarn 1.
 
 ```bash
 yarn install --frozen-lockfile
 yarn start
-yarn build
 ```
+
+Create a production build with `yarn build`.
 
 ## Update content
 
-- `src/content/projects.json`: selected data engineering projects and the preparation repository. Each card links directly to its GitHub repository.
-- `src/content/profile.json`: short bio and social links.
-- `src/content/certifications.json`: certification name, issuer, and verification URL.
-- `src/content/writing.json`: the writing index and article content. Add a new article here with a unique slug, date, summary, tags (use topics such as Spark, SQL, AWS, dbt, and optimization), and body blocks. The site bundles this JSON at build time, so changes are published with the next GitHub Pages deployment; no backend or separate storage service is needed.
+- `src/content/profile.json` — short bio, skills, and contact links.
+- `src/content/projects.json` — selected repository links and technology tags.
+- `src/content/experience.json` — role summary.
+- `src/content/certifications.json` — credential names and verification URLs.
 
-Writing format: each article is an object in `articles`. Supported body blocks are `p` (text), `h2` (text), `list` (items), `code` (lang and code), and `quote` (text). Keep the title, summary, and tags concise so the portfolio remains scannable. The full article text is versioned in GitHub with the site.
+### Publish selected Markdown notes
 
-The `/recruiter` page is a compact overview of skills, selected GitHub projects, verified certification, and recent writing. Its content comes from the same JSON files above.
+`src/content/writing.json` is the publication allowlist. Add a note's title, summary, topic, date, slug, and exact `.md` source path there. The GitHub Pages workflow checks out `minhazalam/data-engineering-interview-prep`, copies only the listed Markdown files into the static build, and generates direct routes under `/writing/<slug>/`. A scheduled daily build refreshes selected note bodies from the source repository. Notes are rendered as Markdown, with a link back to each source file. No notes are published until they are listed in the manifest.
 
-The GitHub Pages workflow runs on pushes to `main` and deploys the production build.
+Example manifest entry:
+
+```json
+{
+  "slug": "spark-skew",
+  "title": "Handling skew in Spark joins",
+  "summary": "A concise summary of the production scenario.",
+  "topic": "Spark",
+  "date": "2026-09-26",
+  "sourceFile": "production-scenarios/spark/skew.md"
+}
+```
+
+Keep copy brief and factual. Add a pipeline diagram only after checking the project repository's documentation. The portfolio does not automatically publish interview-preparation notes.
+
+## Hosting
+
+GitHub Pages serves production from `main` and the design preview from `feature/data-pipeline-design` under `/preview/`.
+
+The site has no analytics or visitor counter.

@@ -14,11 +14,11 @@ module.exports = {
         mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"]
       },
       colors: {
-        ink: "#E7EBF2",
-        mute: "#8C96A8",
-        panel: "#0E1219",
-        panel2: "#141a27",
-        accent: "#4D9FFF",
+        ink: "#E7ECE8",
+        mute: "#9AA8A0",
+        panel: "#171D1A",
+        panel2: "#202825",
+        accent: "#78CBB2",
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
