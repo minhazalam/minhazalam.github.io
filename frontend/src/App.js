@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
 import Writing from "@/pages/Writing";
 import ArticleDetail from "@/pages/ArticleDetail";
+import ProjectDetail from "@/pages/ProjectDetail";
 import NotFound from "@/pages/NotFound";
 
 function ContentGate({ children }) {
@@ -42,6 +43,7 @@ function Shell() {
         <Route path="/" element={<Home />} />
         <Route path="/writing" element={<Writing />} />
         <Route path="/writing/:slug" element={<ArticleDetail />} />
+        <Route path="/projects/:slug" element={<ProjectDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, feature/data-pipeline-design]
+    branches: [main, dev]
   schedule:
     - cron: "23 3 * * *"
   workflow_dispatch:
@@ -26,7 +26,7 @@ jobs:
           path: production
       - uses: actions/checkout@v4
         with:
-          ref: feature/data-pipeline-design
+          ref: dev
           path: preview
       - uses: actions/checkout@v4
         with:
