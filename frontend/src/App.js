@@ -13,7 +13,6 @@ import Work from "@/pages/Work";
 import About from "@/pages/About";
 import ContactPage from "@/pages/ContactPage";
 import Writing from "@/pages/Writing";
-import ArticleDetail from "@/pages/ArticleDetail";
 import Recruiter from "@/pages/Recruiter";
 import NotFound from "@/pages/NotFound";
 
@@ -89,6 +88,11 @@ function Shell() {
       <ScrollToTop />
       <RouteAnalytics />
       <LenisSetup />
+      {process.env.REACT_APP_DEPLOY_TARGET === "preview" && (
+        <div className="fixed right-4 top-20 z-40 rounded-full border border-accent/30 bg-background px-3 py-1 font-mono text-[10px] tracking-wider text-accent">
+          DESIGN PREVIEW
+        </div>
+      )}
       <Navbar />
       <main>
         <Routes>
@@ -96,7 +100,6 @@ function Shell() {
           <Route path="/projects" element={<Work />} />
           <Route path="/about" element={<About />} />
           <Route path="/writing" element={<Writing />} />
-          <Route path="/writing/:slug" element={<ArticleDetail />} />
           <Route path="/recruiter" element={<Recruiter />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="*" element={<NotFound />} />

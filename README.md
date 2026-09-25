@@ -23,4 +23,6 @@ The `Deploy to GitHub Pages` workflow builds and publishes the React app to [min
 - `frontend/src/content/certifications.json` contains credentials and their verification URLs.
 - `frontend/src/content/writing.json` contains article metadata and content. Add topic tags such as `Spark`, `SQL`, `AWS`, `dbt`, or `Optimization`; GitHub stores the content and each push republishes the static site.
 
-The `/recruiter` view is a short introduction to skills, selected repositories, verified credentials, and technical writing. All site content is static JSON—there is no backend.
+The `/recruiter` view is a short introduction to skills, selected repositories, and verified credentials. The notes page links to the preparation repository; generated sample articles are not published. Keep future notes in your own words in that repository, then curate a few for the site.
+
+The `codex/minimal-redesign` branch deploys a design preview under `/preview/`; the production homepage remains built from `main`.

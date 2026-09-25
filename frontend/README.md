@@ -19,6 +19,8 @@ yarn build
 
 Writing format: each article is an object in `articles`. Supported body blocks are `p` (text), `h2` (text), `list` (items), `code` (lang and code), and `quote` (text). Keep the title, summary, and tags concise so the portfolio remains scannable. The full article text is versioned in GitHub with the site.
 
-The `/recruiter` page is a compact overview of skills, selected GitHub projects, verified certification, and recent writing. Its content comes from the same JSON files above.
+The `/recruiter` page is a compact overview of skills, selected GitHub projects, and verified certification. The writing index is intentionally empty until personal notes are ready. Keep full notes in the preparation repository and feature only a few selected notes on the site.
+
+The design preview is built from the `codex/minimal-redesign` branch and published at `/preview/`. The production root is built from `main`.
 
 The GitHub Pages workflow runs on pushes to `main` and deploys the production build.

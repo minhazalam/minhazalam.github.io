@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 222 30% 5%;
-    --foreground: 214 28% 92%;
-    --card: 221 26% 7%;
-    --card-foreground: 214 28% 92%;
-    --popover: 221 26% 7%;
-    --popover-foreground: 214 28% 92%;
-    --primary: 214 100% 64%;
-    --primary-foreground: 222 40% 6%;
-    --secondary: 219 20% 13%;
-    --secondary-foreground: 214 28% 92%;
-    --muted: 219 18% 12%;
-    --muted-foreground: 217 12% 62%;
-    --accent: 214 100% 64%;
-    --accent-foreground: 222 40% 6%;
+    --background: 40 25% 97%;
+    --foreground: 153 20% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 153 20% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 153 20% 14%;
+    --primary: 148 39% 30%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 140 14% 93%;
+    --secondary-foreground: 153 20% 14%;
+    --muted: 140 14% 93%;
+    --muted-foreground: 145 8% 43%;
+    --accent: 148 39% 30%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 218 16% 15%;
-    --input: 218 16% 15%;
-    --ring: 214 100% 64%;
+    --border: 140 12% 86%;
+    --input: 140 12% 86%;
+    --ring: 148 39% 30%;
     --radius: 0.5rem;
   }
 
@@ -35,8 +35,8 @@
   }
 
   ::selection {
-    background: rgba(77, 159, 255, 0.28);
-    color: #f4f7fb;
+    background: rgba(47, 107, 79, 0.2);
+    color: #1d2a24;
   }
 }
 
@@ -45,10 +45,10 @@
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0c11;
+  background: #f7f6f1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e2635;
+  background: #ccd5ce;
   border-radius: 8px;
   border: 2px solid #0a0c11;
 }
@@ -57,12 +57,7 @@
 }
 
 @layer utilities {
-  .bg-grid {
-    background-image:
-      linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-    background-size: 54px 54px;
-  }
+  .bg-grid { background-image: none; }
   .noise-overlay {
     position: relative;
   }
