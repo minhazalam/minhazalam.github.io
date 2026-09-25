@@ -10,13 +10,10 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import Home from "@/pages/Home";
 import Work from "@/pages/Work";
-import ProjectDetail from "@/pages/ProjectDetail";
-import Engineering from "@/pages/Engineering";
-import ExperiencePage from "@/pages/ExperiencePage";
-import Writing from "@/pages/Writing";
-import ArticleDetail from "@/pages/ArticleDetail";
 import About from "@/pages/About";
 import ContactPage from "@/pages/ContactPage";
+import Writing from "@/pages/Writing";
+import ArticleDetail from "@/pages/ArticleDetail";
 import Recruiter from "@/pages/Recruiter";
 import NotFound from "@/pages/NotFound";
 
@@ -97,15 +94,11 @@ function Shell() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/projects" element={<Work />} />
-          <Route path="/projects/:slug" element={<ProjectDetail />} />
-          <Route path="/engineering" element={<Engineering />} />
-          <Route path="/playground" element={<Engineering />} />
-          <Route path="/experience" element={<ExperiencePage />} />
+          <Route path="/about" element={<About />} />
           <Route path="/writing" element={<Writing />} />
           <Route path="/writing/:slug" element={<ArticleDetail />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<ContactPage />} />
           <Route path="/recruiter" element={<Recruiter />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

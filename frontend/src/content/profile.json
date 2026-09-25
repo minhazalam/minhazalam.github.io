@@ -4,20 +4,12 @@
   "role": "Senior Software Engineer — Data Engineering",
   "headline": "Senior Data Engineer | Data Platforms | Distributed Systems | AI",
   "subline": "Senior Data Engineer focused on data platforms, distributed processing and cloud-native systems.",
-  "summary": "Data engineer with 6 years of experience across Accenture and Oracle, currently building data platforms and distributed processing systems. Focused on the transition from traditional data engineering toward data platforms, cloud engineering, AI-assisted systems and developer tooling.",
+  "summary": "Data engineer focused on data platforms and distributed processing.",
   "email": "minhazalam365@gmail.com",
   "linkedin": "https://www.linkedin.com/in/alam",
   "github": "https://github.com/minhazalam",
   "githubUsername": "minhazalam",
   "availability": "Open to Data Engineering / Data Platform opportunities",
-  "location": "[City, Country]",
   "techLine": ["Python", "SQL", "PySpark", "Spark", "AWS", "Databricks", "Snowflake", "dbt"],
-  "focus": ["Data Platforms", "Distributed Systems", "Cloud Data Engineering", "AI-assisted Systems", "Developer Tooling"],
-  "exploring": ["AI-assisted data engineering", "LLM-powered internal tooling", "Streaming architectures"],
-  "resumeSummary": {
-    "title": "Senior Data Engineer",
-    "years": "6 years experience",
-    "stack": "Python · SQL · PySpark · AWS · Databricks",
-    "domains": ["Data Platforms", "Distributed Systems", "Cloud Data Engineering"]
-  }
+  "focus": ["Data Platforms", "Distributed Systems", "Cloud Data Engineering"]
 }

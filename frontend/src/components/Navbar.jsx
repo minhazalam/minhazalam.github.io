@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Github, Menu, X } from "lucide-react";
-import { RESUME_URL } from "@/lib/api";
-import { track } from "@/lib/analytics";
 
 const LINKS = [
   { to: "/projects", label: "Work", id: "work" },
-  { to: "/experience", label: "Experience", id: "experience" },
+  { to: "/writing", label: "Writing", id: "writing" },
   { to: "/about", label: "About", id: "about" },
+  { to: "/recruiter", label: "Recruiter", id: "recruiter" },
 ];
 
 export default function Navbar() {
@@ -22,95 +21,40 @@ export default function Navbar() {
         <Link to="/" data-testid="nav-logo" className="font-mono text-sm font-medium tracking-[0.22em] text-ink">
           MINHAZ ALAM
         </Link>
-
         <div className="hidden items-center gap-7 lg:flex">
-          {LINKS.map((l) => (
+          {LINKS.map((link) => (
             <NavLink
-              key={l.id}
-              to={l.to}
-              data-testid={`nav-link-${l.id}`}
-              className={({ isActive }) =>
-                `font-mono text-xs tracking-wider transition-colors ${
-                  isActive ? "text-accent" : "text-mute hover:text-ink"
-                }`
-              }
+              key={link.id}
+              to={link.to}
+              data-testid={`nav-link-${link.id}`}
+              className={({ isActive }) => `font-mono text-xs tracking-wider transition-colors ${isActive ? "text-accent" : "text-mute hover:text-ink"}`}
             >
-              {l.label.toUpperCase()}
+              {link.label.toUpperCase()}
             </NavLink>
           ))}
         </div>
-
         <div className="hidden items-center gap-3 lg:flex">
-          <a
-            href="https://github.com/minhazalam"
-            target="_blank"
-            rel="noreferrer"
-            data-testid="nav-github-link"
-            onClick={() => track("github_click", "nav")}
-            className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 font-mono text-xs text-mute transition-colors hover:border-mute/50 hover:text-ink"
-          >
+          <a href="https://github.com/minhazalam" target="_blank" rel="noreferrer" data-testid="nav-github-link" className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 font-mono text-xs text-mute transition-colors hover:border-mute/50 hover:text-ink">
             <Github size={14} /> GITHUB
           </a>
-          <a
-            href={RESUME_URL}
-            target="_blank"
-            rel="noreferrer"
-            data-testid="nav-resume-link"
-            onClick={() => track("resume_view", "nav")}
-            className="rounded-md border border-border px-3 py-1.5 font-mono text-xs text-mute transition-colors hover:border-mute/50 hover:text-ink"
-          >
-            RESUME
-          </a>
-          <Link
-            to="/contact"
-            data-testid="nav-cta-contact"
-            className="rounded-md bg-accent px-4 py-1.5 font-mono text-xs font-medium tracking-wider text-[#06121f] transition-all hover:brightness-110"
-          >
-            LET'S TALK
+          <Link to="/contact" data-testid="nav-cta-contact" className="rounded-md bg-accent px-4 py-1.5 font-mono text-xs font-medium tracking-wider text-[#06121f] transition-all hover:brightness-110">
+            CONTACT
           </Link>
         </div>
-
-        <button
-          className="rounded-md border border-border p-2 text-ink lg:hidden"
-          onClick={() => setOpen(!open)}
-          data-testid="nav-menu-toggle"
-          aria-label="Toggle navigation menu"
-        >
+        <button className="rounded-md border border-border p-2 text-ink lg:hidden" onClick={() => setOpen(!open)} data-testid="nav-menu-toggle" aria-label="Toggle navigation menu">
           {open ? <X size={18} /> : <Menu size={18} />}
         </button>
       </nav>
-
       {open && (
         <div className="border-t border-border bg-background px-5 pb-6 pt-3 lg:hidden" data-testid="nav-mobile-menu">
-          {LINKS.map((l) => (
-            <NavLink
-              key={l.id}
-              to={l.to}
-              data-testid={`nav-mobile-link-${l.id}`}
-              className={({ isActive }) =>
-                `block py-2.5 font-mono text-sm tracking-wider ${isActive ? "text-accent" : "text-mute"}`
-              }
-            >
-              {l.label.toUpperCase()}
+          {LINKS.map((link) => (
+            <NavLink key={link.id} to={link.to} data-testid={`nav-mobile-link-${link.id}`} className={({ isActive }) => `block py-2.5 font-mono text-sm tracking-wider ${isActive ? "text-accent" : "text-mute"}`}>
+              {link.label.toUpperCase()}
             </NavLink>
           ))}
           <div className="mt-4 flex gap-3">
-            <a
-              href={RESUME_URL}
-              target="_blank"
-              rel="noreferrer"
-              data-testid="nav-mobile-resume"
-              className="flex-1 rounded-md border border-border py-2.5 text-center font-mono text-xs text-mute"
-            >
-              RESUME
-            </a>
-            <Link
-              to="/contact"
-              data-testid="nav-mobile-contact"
-              className="flex-1 rounded-md bg-accent py-2.5 text-center font-mono text-xs font-medium text-[#06121f]"
-            >
-              LET'S TALK
-            </Link>
+            <a href="https://github.com/minhazalam" target="_blank" rel="noreferrer" className="flex-1 rounded-md border border-border py-2.5 text-center font-mono text-xs text-mute">GITHUB</a>
+            <Link to="/contact" data-testid="nav-mobile-contact" className="flex-1 rounded-md bg-accent py-2.5 text-center font-mono text-xs font-medium text-[#06121f]">CONTACT</Link>
           </div>
         </div>
       )}

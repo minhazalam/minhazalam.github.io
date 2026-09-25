@@ -1,6 +1,6 @@
 # Minhaz Alam — Data Engineering Portfolio
 
-A minimal, responsive portfolio for data engineering work. The site is a static React application: it has no server, database, API keys, or runtime write operations. Portfolio content is version-controlled JSON, and each project can link to its own GitHub repository for code, documentation, and downloadable artifacts.
+A minimal static portfolio highlighting selected data engineering repositories. Project code and detailed documentation live on GitHub.
 
 ## Run locally
 
@@ -8,29 +8,19 @@ Requirements: Node.js 20 and Yarn 1.
 
 ```bash
 cd frontend
-yarn install
+yarn install --frozen-lockfile
 yarn start
 ```
 
-Open http://localhost:3000. The app uses hash-based routes so project pages work at https://minhazalam.github.io/ on static hosting.
+## Deploy
 
-## Deploy with GitHub Pages
+The `Deploy to GitHub Pages` workflow builds and publishes the React app to [minhazalam.github.io](https://minhazalam.github.io/) on each push to `main`.
 
-1. Push the repository to GitHub.
-2. In **Settings → Pages**, select **GitHub Actions** as the source.
-3. Push to `main`, or run the **Deploy to GitHub Pages** workflow manually.
+## Content
 
-The workflow in `.github/workflows/deploy-pages.yml` builds the static app and publishes `frontend/build`. No secrets or backend services are required.
+- `frontend/src/content/projects.json` lists the selected data engineering and preparation repositories.
+- `frontend/src/content/profile.json` contains the short introduction and contact links.
+- `frontend/src/content/certifications.json` contains credentials and their verification URLs.
+- `frontend/src/content/writing.json` contains article metadata and content. Add topic tags such as `Spark`, `SQL`, `AWS`, `dbt`, or `Optimization`; GitHub stores the content and each push republishes the static site.
 
-## Manage portfolio content
-
-Edit the JSON files in `frontend/src/content/`; changes are included at build time. See [frontend/README.md](frontend/README.md) for each content schema and project link guidance. For larger assets and project-specific documentation, store them in a public GitHub repository and link to them from the project entry.
-
-## Architecture
-
-- `frontend/src/pages` and `frontend/src/components`: React UI and routes.
-- `frontend/src/content`: profile, project, experience, writing, skill, certification, architecture, and lab data.
-- `.github/workflows/deploy-pages.yml`: static GitHub Pages deployment.
-- GitHub's public API is used only for optional public repository listings; curated portfolio content does not depend on that request.
-
-There is no backend or persistent user data. The contact action uses email links.
+The `/recruiter` view is a short introduction to skills, selected repositories, verified credentials, and technical writing. All site content is static JSON—there is no backend.

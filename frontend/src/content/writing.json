@@ -6,34 +6,81 @@
       "summary": "How Spark turns SQL/DataFrame code into an execution plan, the plan smells that explain most slow jobs, and a repeatable debugging workflow.",
       "date": "2025-11-18",
       "readingTime": "7 min",
-      "tags": ["Spark", "PySpark", "Performance"],
-      "body": [
-        { "type": "p", "text": "Most slow Spark jobs are not slow because Spark is slow. They are slow because the query the author wrote is not the query Spark actually executes — or because the physical plan is doing work nobody asked for. Optimization starts by reading the plan, not by guessing at fixes." },
-        { "type": "h2", "text": "What actually happens when you run a query" },
-        { "type": "p", "text": "A DataFrame or SQL query passes through four phases: parsing, analysis (resolving columns against the catalog), logical optimization (predicate pushdown, projection pruning, constant folding), and physical planning (choosing joins, shuffle strategies, partitioning). Catalyst does most of this automatically — which is exactly why you should verify what it decided instead of assuming." },
-        { "type": "code", "lang": "python", "code": "df.explain(mode=\"formatted\")\n# or for SQL:\nspark.sql(\"SELECT ... \").explain(True)" },
-        { "type": "h2", "text": "The plan smells that explain most slow jobs" },
-        { "type": "list", "items": [
-          "Full-table scans where partition pruning should have happened — the plan reads every partition, usually a filter on a non-partition column or a function wrapped around the partition key.",
-          "Exchange (shuffle) where a broadcast would do — a big-table join that could have used a small dimension broadcast.",
-          "SortMergeJoin on data with skew — the stage shows one straggler task at 99%.",
-          "Repeated scans of the same source — the same Parquet read appears twice in the plan because caching or reuse didn't kick in.",
-          "In-memory death by UDF — a Python UDF that serializes every row between JVM and Python when the same logic could be built-in functions."
-        ] },
-        { "type": "h2", "text": "Fixes that actually move the needle" },
-        { "type": "code", "lang": "python", "code": "# 1. Partition pruning: no functions on the partition key\ndf.filter(\"event_date = '2025-11-18'\")          # prunes\ndf.filter(year(event_date) == 2025)              # does not\n\n# 2. Broadcast the small side explicitly when the optimizer won't\nfrom pyspark.sql.functions import broadcast\ndf.join(broadcast(dims), \"dim_id\")\n\n# 3. Let AQE handle skew and shuffle partition sizing (Spark 3.x)\nspark.conf.set(\"spark.sql.adaptive.enabled\", \"true\")\nspark.conf.set(\"spark.sql.adaptive.skewJoin.enabled\", \"true\")" },
-        { "type": "p", "text": "Caching deserves a caveat: `.cache()` is not free and not always a win. Cache only when the same DataFrame is consumed more than once in the same job, and unpersist when done. The plan tells you if reuse actually happened — look for `InMemoryTableScan` in both branches." },
-        { "type": "h2", "text": "A repeatable debugging workflow" },
-        { "type": "list", "items": [
-          "Read the physical plan end-to-end once — you're looking for scans, exchanges and join strategies.",
-          "Compare stage timelines: one straggler task means skew; many short tasks means over-partitioning.",
-          "Check the shuffle read/write sizes — a shuffle larger than the input table is a red flag.",
-          "Apply one fix at a time and re-read the plan. Optimizations interact; batching five 'improvements' teaches you nothing."
-        ] },
-        { "type": "quote", "text": "The plan is the spec. If your mental model and the physical plan disagree, the plan wins." },
-        { "type": "p", "text": "None of this is exotic. The discipline is simply refusing to tune what you haven't read — the same instinct that makes a good data engineer in every other part of the stack." }
+      "tags": [
+        "Spark",
+        "PySpark",
+        "Performance"
       ],
-      "relatedProjects": ["aws-data-platform", "advanced-data-platform"]
+      "body": [
+        {
+          "type": "p",
+          "text": "Most slow Spark jobs are not slow because Spark is slow. They are slow because the query the author wrote is not the query Spark actually executes — or because the physical plan is doing work nobody asked for. Optimization starts by reading the plan, not by guessing at fixes."
+        },
+        {
+          "type": "h2",
+          "text": "What actually happens when you run a query"
+        },
+        {
+          "type": "p",
+          "text": "A DataFrame or SQL query passes through four phases: parsing, analysis (resolving columns against the catalog), logical optimization (predicate pushdown, projection pruning, constant folding), and physical planning (choosing joins, shuffle strategies, partitioning). Catalyst does most of this automatically — which is exactly why you should verify what it decided instead of assuming."
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "code": "df.explain(mode=\"formatted\")\n# or for SQL:\nspark.sql(\"SELECT ... \").explain(True)"
+        },
+        {
+          "type": "h2",
+          "text": "The plan smells that explain most slow jobs"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Full-table scans where partition pruning should have happened — the plan reads every partition, usually a filter on a non-partition column or a function wrapped around the partition key.",
+            "Exchange (shuffle) where a broadcast would do — a big-table join that could have used a small dimension broadcast.",
+            "SortMergeJoin on data with skew — the stage shows one straggler task at 99%.",
+            "Repeated scans of the same source — the same Parquet read appears twice in the plan because caching or reuse didn't kick in.",
+            "In-memory death by UDF — a Python UDF that serializes every row between JVM and Python when the same logic could be built-in functions."
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "Fixes that actually move the needle"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "code": "# 1. Partition pruning: no functions on the partition key\ndf.filter(\"event_date = '2025-11-18'\")          # prunes\ndf.filter(year(event_date) == 2025)              # does not\n\n# 2. Broadcast the small side explicitly when the optimizer won't\nfrom pyspark.sql.functions import broadcast\ndf.join(broadcast(dims), \"dim_id\")\n\n# 3. Let AQE handle skew and shuffle partition sizing (Spark 3.x)\nspark.conf.set(\"spark.sql.adaptive.enabled\", \"true\")\nspark.conf.set(\"spark.sql.adaptive.skewJoin.enabled\", \"true\")"
+        },
+        {
+          "type": "p",
+          "text": "Caching deserves a caveat: `.cache()` is not free and not always a win. Cache only when the same DataFrame is consumed more than once in the same job, and unpersist when done. The plan tells you if reuse actually happened — look for `InMemoryTableScan` in both branches."
+        },
+        {
+          "type": "h2",
+          "text": "A repeatable debugging workflow"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Read the physical plan end-to-end once — you're looking for scans, exchanges and join strategies.",
+            "Compare stage timelines: one straggler task means skew; many short tasks means over-partitioning.",
+            "Check the shuffle read/write sizes — a shuffle larger than the input table is a red flag.",
+            "Apply one fix at a time and re-read the plan. Optimizations interact; batching five 'improvements' teaches you nothing."
+          ]
+        },
+        {
+          "type": "quote",
+          "text": "The plan is the spec. If your mental model and the physical plan disagree, the plan wins."
+        },
+        {
+          "type": "p",
+          "text": "None of this is exotic. The discipline is simply refusing to tune what you haven't read — the same instinct that makes a good data engineer in every other part of the stack."
+        }
+      ],
+      "relatedProjects": [
+        "enterprise-data-platform"
+      ]
     },
     {
       "slug": "data-skew-in-spark",
@@ -41,26 +88,67 @@
       "summary": "Why one task at 99% is costing you a cluster, how to detect skew from stage metrics, and four mitigations that cover most cases.",
       "date": "2025-10-30",
       "readingTime": "6 min",
-      "tags": ["Spark", "PySpark", "Distributed Systems"],
-      "body": [
-        { "type": "p", "text": "You have 200 executors. One task runs for 40 minutes while the other 199 finish in 90 seconds. That's data skew: the keys are not evenly distributed, so the work isn't either. Everything in the stage waits for the unlucky task that got the heavy keys." },
-        { "type": "h2", "text": "Why it happens" },
-        { "type": "p", "text": "Joins and aggregations hash keys to partitions. Real data is rarely uniform — one tenant, one country or one default value often dominates. The classic offender is the null key: every null hashes to the same partition, so all your 'unknown' rows pile into a single task." },
-        { "type": "code", "lang": "python", "code": "# quick skew check: distribution of the join key\ndf.groupBy(\"customer_id\").count() \\\n  .orderBy(col(\"count\").desc()) \\\n  .show(5)" },
-        { "type": "h2", "text": "How to detect it before reading the code" },
-        { "type": "list", "items": [
-          "Stage timeline: one task dramatically longer than its peers at the same stage.",
-          "Task metrics: the straggler shows high spill (memory/disk) or GC time while others idle.",
-          "Summary metrics: max vs median task duration in the same stage differs by an order of magnitude.",
-          "Plan: a SortMergeJoin on a key you already suspect is hot."
-        ] },
-        { "type": "h2", "text": "Four mitigations, in order of preference" },
-        { "type": "code", "lang": "python", "code": "# 1. Broadcast join — no shuffle of the big side at all\ndf.join(broadcast(dims), \"dim_id\")\n\n# 2. AQE skew join (Spark 3.x) — splits skewed partitions automatically\nspark.conf.set(\"spark.sql.adaptive.skewJoin.enabled\", \"true\")\n\n# 3. Salting — explode hot keys into N sub-keys, aggregate twice\nsalted = hot.withColumn(\"salt\", (rand() * N).cast(\"int\"))\n# ... group by (key, salt), then aggregate again by key\n\n# 4. Isolate + union — process hot keys separately with special handling\n(hot_keys_df, normal_df) = df splits...\nresult = hot_path.unionByName(normal_path)" },
-        { "type": "p", "text": "Broadcast works when the small side truly fits in memory — measure, don't hope. AQE fixes the common cases for free and should be your default. Salting works always but doubles the aggregation logic. Isolation is for keys that need semantically different handling (like nulls)." },
-        { "type": "h2", "text": "Why it matters beyond speed" },
-        { "type": "p", "text": "Skew is not just slow — it's unstable. The straggler task is the one that OOMs, spills to disk and triggers retries, which means your job's tail latency and reliability are both governed by your most skewed key. Fix the skew and you fix three symptoms at once." }
+      "tags": [
+        "Spark",
+        "PySpark",
+        "Distributed Systems"
       ],
-      "relatedProjects": ["advanced-data-platform", "aws-data-platform"]
+      "body": [
+        {
+          "type": "p",
+          "text": "You have 200 executors. One task runs for 40 minutes while the other 199 finish in 90 seconds. That's data skew: the keys are not evenly distributed, so the work isn't either. Everything in the stage waits for the unlucky task that got the heavy keys."
+        },
+        {
+          "type": "h2",
+          "text": "Why it happens"
+        },
+        {
+          "type": "p",
+          "text": "Joins and aggregations hash keys to partitions. Real data is rarely uniform — one tenant, one country or one default value often dominates. The classic offender is the null key: every null hashes to the same partition, so all your 'unknown' rows pile into a single task."
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "code": "# quick skew check: distribution of the join key\ndf.groupBy(\"customer_id\").count() \\\n  .orderBy(col(\"count\").desc()) \\\n  .show(5)"
+        },
+        {
+          "type": "h2",
+          "text": "How to detect it before reading the code"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Stage timeline: one task dramatically longer than its peers at the same stage.",
+            "Task metrics: the straggler shows high spill (memory/disk) or GC time while others idle.",
+            "Summary metrics: max vs median task duration in the same stage differs by an order of magnitude.",
+            "Plan: a SortMergeJoin on a key you already suspect is hot."
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "Four mitigations, in order of preference"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "code": "# 1. Broadcast join — no shuffle of the big side at all\ndf.join(broadcast(dims), \"dim_id\")\n\n# 2. AQE skew join (Spark 3.x) — splits skewed partitions automatically\nspark.conf.set(\"spark.sql.adaptive.skewJoin.enabled\", \"true\")\n\n# 3. Salting — explode hot keys into N sub-keys, aggregate twice\nsalted = hot.withColumn(\"salt\", (rand() * N).cast(\"int\"))\n# ... group by (key, salt), then aggregate again by key\n\n# 4. Isolate + union — process hot keys separately with special handling\n(hot_keys_df, normal_df) = df splits...\nresult = hot_path.unionByName(normal_path)"
+        },
+        {
+          "type": "p",
+          "text": "Broadcast works when the small side truly fits in memory — measure, don't hope. AQE fixes the common cases for free and should be your default. Salting works always but doubles the aggregation logic. Isolation is for keys that need semantically different handling (like nulls)."
+        },
+        {
+          "type": "h2",
+          "text": "Why it matters beyond speed"
+        },
+        {
+          "type": "p",
+          "text": "Skew is not just slow — it's unstable. The straggler task is the one that OOMs, spills to disk and triggers retries, which means your job's tail latency and reliability are both governed by your most skewed key. Fix the skew and you fix three symptoms at once."
+        }
+      ],
+      "relatedProjects": [
+        "enterprise-data-platform"
+      ]
     },
     {
       "slug": "designing-aws-data-pipelines",
@@ -68,29 +156,79 @@
       "summary": "A practical walk through the architecture decisions that matter when building a pipeline on AWS — zones, catalog, compute, idempotency and cost.",
       "date": "2025-12-08",
       "readingTime": "8 min",
-      "tags": ["AWS", "Architecture", "Data Pipelines"],
-      "body": [
-        { "type": "p", "text": "Most AWS pipeline conversations start with 'which service?' and skip the decisions that actually determine whether the pipeline survives its first year. This article walks the decisions in the order I'd make them, using the boring-but-proven AWS primitives." },
-        { "type": "h2", "text": "Decision 1: Storage zones before compute" },
-        { "type": "p", "text": "Land raw data in S3 before anything else, immutable and partitioned by ingest date. Raw is your replay button: when transformation logic changes — and it will — you re-run from raw instead of re-asking the source system. Zone layout (raw / curated / rejected) is the cheapest architecture decision you'll ever make." },
-        { "type": "code", "lang": "text", "code": "s3://lake/raw/orders/event_date=2025-12-08/     # immutable\ns3://lake/curated/orders/event_date=2025-12-08/ # validated, Parquet\ns3://lake/rejected/orders/event_date=2025-12-08/ # failed checks + reason" },
-        { "type": "h2", "text": "Decision 2: The catalog is a product" },
-        { "type": "p", "text": "The Glue catalog turns files into tables — but schemas drift, crawlers lag and suddenly Athena reads a column that no longer exists. Treat catalog changes as events: run schema checks at the quality gate, alert on drift, and never let a crawler silently redefine a curated table." },
-        { "type": "h2", "text": "Decision 3: Compute per job, not per platform" },
-        { "type": "p", "text": "Pick the smallest engine that handles the data: Athena for SQL-scoped transformations, PySpark (EMR / Glue / Databricks) when data or complexity exceeds single-node SQL. The reverse — Spark for everything — costs more and debugs worse. The threshold question is simple: does the job need more than one machine's memory, or more than SQL's expressiveness?" },
-        { "type": "h2", "text": "Decision 4: Idempotency by partition" },
-        { "type": "code", "lang": "python", "code": "# deterministic per partition: safe to re-run any window\n(curated.filter(col(\"event_date\") == run_date)\n    .write.mode(\"overwrite\")\n    .partitionBy(\"event_date\")\n    .parquet(path))" },
-        { "type": "p", "text": "If a job writes 'append' and gets retried, you get duplicates. If it overwrites by partition deterministically, retries are free. This one convention eliminates an entire class of 3 AM incidents." },
-        { "type": "h2", "text": "Decision 5: Cost is an architecture output" },
-        { "type": "list", "items": [
-          "Partition layout decides query cost — prune what consumers filter on.",
-          "File sizes decide API overhead — compact small files on a schedule.",
-          "Lifecycle policies decide storage cost — raw data cools, curated stays hot.",
-          "Every scan is a bill — the curated zone exists so consumers never scan raw."
-        ] },
-        { "type": "p", "text": "None of these decisions requires an exotic service. The platforms that last are built on boring primitives arranged with discipline — zones, catalogs, idempotent writes and gates." }
+      "tags": [
+        "AWS",
+        "Architecture",
+        "Data Pipelines"
       ],
-      "relatedProjects": ["aws-data-platform", "advanced-data-platform"]
+      "body": [
+        {
+          "type": "p",
+          "text": "Most AWS pipeline conversations start with 'which service?' and skip the decisions that actually determine whether the pipeline survives its first year. This article walks the decisions in the order I'd make them, using the boring-but-proven AWS primitives."
+        },
+        {
+          "type": "h2",
+          "text": "Decision 1: Storage zones before compute"
+        },
+        {
+          "type": "p",
+          "text": "Land raw data in S3 before anything else, immutable and partitioned by ingest date. Raw is your replay button: when transformation logic changes — and it will — you re-run from raw instead of re-asking the source system. Zone layout (raw / curated / rejected) is the cheapest architecture decision you'll ever make."
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "s3://lake/raw/orders/event_date=2025-12-08/     # immutable\ns3://lake/curated/orders/event_date=2025-12-08/ # validated, Parquet\ns3://lake/rejected/orders/event_date=2025-12-08/ # failed checks + reason"
+        },
+        {
+          "type": "h2",
+          "text": "Decision 2: The catalog is a product"
+        },
+        {
+          "type": "p",
+          "text": "The Glue catalog turns files into tables — but schemas drift, crawlers lag and suddenly Athena reads a column that no longer exists. Treat catalog changes as events: run schema checks at the quality gate, alert on drift, and never let a crawler silently redefine a curated table."
+        },
+        {
+          "type": "h2",
+          "text": "Decision 3: Compute per job, not per platform"
+        },
+        {
+          "type": "p",
+          "text": "Pick the smallest engine that handles the data: Athena for SQL-scoped transformations, PySpark (EMR / Glue / Databricks) when data or complexity exceeds single-node SQL. The reverse — Spark for everything — costs more and debugs worse. The threshold question is simple: does the job need more than one machine's memory, or more than SQL's expressiveness?"
+        },
+        {
+          "type": "h2",
+          "text": "Decision 4: Idempotency by partition"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "code": "# deterministic per partition: safe to re-run any window\n(curated.filter(col(\"event_date\") == run_date)\n    .write.mode(\"overwrite\")\n    .partitionBy(\"event_date\")\n    .parquet(path))"
+        },
+        {
+          "type": "p",
+          "text": "If a job writes 'append' and gets retried, you get duplicates. If it overwrites by partition deterministically, retries are free. This one convention eliminates an entire class of 3 AM incidents."
+        },
+        {
+          "type": "h2",
+          "text": "Decision 5: Cost is an architecture output"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Partition layout decides query cost — prune what consumers filter on.",
+            "File sizes decide API overhead — compact small files on a schedule.",
+            "Lifecycle policies decide storage cost — raw data cools, curated stays hot.",
+            "Every scan is a bill — the curated zone exists so consumers never scan raw."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "None of these decisions requires an exotic service. The platforms that last are built on boring primitives arranged with discipline — zones, catalogs, idempotent writes and gates."
+        }
+      ],
+      "relatedProjects": [
+        "enterprise-data-platform"
+      ]
     },
     {
       "slug": "dbt-snowflake-transformation-layers",
@@ -98,58 +236,76 @@
       "summary": "Layering models in dbt, enforcing contracts with tests, and using Snowflake's compute model without paying for chaos.",
       "date": "2025-09-21",
       "readingTime": "6 min",
-      "tags": ["dbt", "Snowflake", "SQL", "Data Modeling"],
-      "body": [
-        { "type": "p", "text": "A warehouse full of ad-hoc SQL is a liability with a nice UI. The fix is a layered dbt project with enforced contracts between layers — and Snowflake's separation of storage and compute makes the pattern particularly clean." },
-        { "type": "h2", "text": "Three layers, three responsibilities" },
-        { "type": "list", "items": [
-          "Staging: one model per source table. Rename, cast, trim. No joins, no business logic. It exists so the mess is normalized exactly once.",
-          "Intermediate: joins, deduplication, reusable business logic. Where 'how the business thinks' gets encoded — and tested.",
-          "Marts: consumer-facing entities with deliberate grain. If a mart model joins a raw source directly, the architecture has failed."
-        ] },
-        { "type": "code", "lang": "sql", "code": "-- staging: 1:1 with source, boring on purpose\nSELECT\n    listing_id      AS listing_id,\n    host_id         AS host_id,\n    price           AS price_night,\n    room_type       AS room_type\nFROM {{ source('raw', 'listings') }}" },
-        { "type": "h2", "text": "Tests are the contract" },
-        { "type": "p", "text": "Unique and not-null on keys. Accepted values on categoricals. Relationships between layers. These generic tests catch the majority of real breakages — upstream schema changes, duplicated rows, orphaned foreign keys — at build time instead of in someone's dashboard." },
-        { "type": "code", "lang": "yaml", "code": "models:\n  - name: stg_listings\n    columns:\n      - name: listing_id\n        tests: [unique, not_null]\n      - name: room_type\n        tests:\n          - accepted_values:\n              values: ['Entire home', 'Private room', 'Shared room']" },
-        { "type": "h2", "text": "Snowflake-specific practice" },
-        { "type": "list", "items": [
-          "Separate warehouses per workload class (loading, transforming, BI) so a heavy dbt build doesn't starve dashboards.",
-          "Incremental materialization for large facts, with a documented merge key and a scheduled full-refresh window.",
-          "Zero-copy cloning of schemas for testing risky model changes against production-sized data.",
-          "Monitor query history per warehouse — the cheapest performance feedback loop available."
-        ] },
-        { "type": "h2", "text": "Documentation is lineage, not decoration" },
-        { "type": "p", "text": "Model descriptions feed the dbt docs lineage graph, which is how new consumers onboard without a meeting. Write descriptions for the models others will consume — marts first — and let the graph do the explaining." },
-        { "type": "quote", "text": "The transformation layer is finished not when it produces the right number, but when a stranger can trace why the number is right." }
+      "tags": [
+        "dbt",
+        "Snowflake",
+        "SQL",
+        "Data Modeling"
       ],
-      "relatedProjects": ["airbnb-analytics"]
-    },
-    {
-      "slug": "building-stackgen-cli",
-      "title": "Building StackGen: Lessons From Publishing a Python CLI",
-      "summary": "From local script to published PyPI package — what changes, what breaks, and the engineering habits that make a CLI a real tool.",
-      "date": "2025-08-14",
-      "readingTime": "5 min",
-      "tags": ["Python", "Developer Tooling", "CLI"],
       "body": [
-        { "type": "p", "text": "A CLI that lives on your machine is a script. A CLI other people can install is a product — with a public contract, a version history and strangers' environments to break in. Publishing StackGen to PyPI taught more about software engineering than the tool itself ever needed." },
-        { "type": "h2", "text": "The entry point is the product" },
-        { "type": "p", "text": "Command names, flags, defaults and error messages are the user interface of a CLI. The console entry point in your package metadata is where the product begins — everything else is implementation. Spend the effort on `--help` output and the error messages for the ten most likely mistakes." },
-        { "type": "code", "lang": "toml", "code": "[project.scripts]\nstackgen = \"stackgen.cli:main\"" },
-        { "type": "h2", "text": "Packaging is where toy scripts become tools" },
-        { "type": "list", "items": [
-          "Declare dependencies honestly — your import list is your support burden.",
-          "Pin the minimum Python version and actually test against it.",
-          "Build with `python -m build`, publish with Twine; the release flow should be a script, not a memory test.",
-          "Include the README and a LICENSE — a PyPI page without them reads as abandoned."
-        ] },
-        { "type": "h2", "text": "Semantic versioning becomes real" },
-        { "type": "p", "text": "The moment anyone's automation runs `pip install your-tool`, breaking changes have blast radius. Generated output for a version must be stable: same inputs, same files. Semver plus a changelog is the cheapest trust-building mechanism a maintainer has." },
-        { "type": "h2", "text": "CI or it didn't happen" },
-        { "type": "p", "text": "GitHub Actions running tests on every push and publishing on tag turned releases from an event into a routine. The workflow is simple; the discipline it enforces — tests green before publish, tags match changelogs — is the actual value." },
-        { "type": "quote", "text": "Distribution is the difference between a project and a tool. The code is the easy half." }
+        {
+          "type": "p",
+          "text": "A warehouse full of ad-hoc SQL is a liability with a nice UI. The fix is a layered dbt project with enforced contracts between layers — and Snowflake's separation of storage and compute makes the pattern particularly clean."
+        },
+        {
+          "type": "h2",
+          "text": "Three layers, three responsibilities"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Staging: one model per source table. Rename, cast, trim. No joins, no business logic. It exists so the mess is normalized exactly once.",
+            "Intermediate: joins, deduplication, reusable business logic. Where 'how the business thinks' gets encoded — and tested.",
+            "Marts: consumer-facing entities with deliberate grain. If a mart model joins a raw source directly, the architecture has failed."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "sql",
+          "code": "-- staging: 1:1 with source, boring on purpose\nSELECT\n    listing_id      AS listing_id,\n    host_id         AS host_id,\n    price           AS price_night,\n    room_type       AS room_type\nFROM {{ source('raw', 'listings') }}"
+        },
+        {
+          "type": "h2",
+          "text": "Tests are the contract"
+        },
+        {
+          "type": "p",
+          "text": "Unique and not-null on keys. Accepted values on categoricals. Relationships between layers. These generic tests catch the majority of real breakages — upstream schema changes, duplicated rows, orphaned foreign keys — at build time instead of in someone's dashboard."
+        },
+        {
+          "type": "code",
+          "lang": "yaml",
+          "code": "models:\n  - name: stg_listings\n    columns:\n      - name: listing_id\n        tests: [unique, not_null]\n      - name: room_type\n        tests:\n          - accepted_values:\n              values: ['Entire home', 'Private room', 'Shared room']"
+        },
+        {
+          "type": "h2",
+          "text": "Snowflake-specific practice"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Separate warehouses per workload class (loading, transforming, BI) so a heavy dbt build doesn't starve dashboards.",
+            "Incremental materialization for large facts, with a documented merge key and a scheduled full-refresh window.",
+            "Zero-copy cloning of schemas for testing risky model changes against production-sized data.",
+            "Monitor query history per warehouse — the cheapest performance feedback loop available."
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "Documentation is lineage, not decoration"
+        },
+        {
+          "type": "p",
+          "text": "Model descriptions feed the dbt docs lineage graph, which is how new consumers onboard without a meeting. Write descriptions for the models others will consume — marts first — and let the graph do the explaining."
+        },
+        {
+          "type": "quote",
+          "text": "The transformation layer is finished not when it produces the right number, but when a stranger can trace why the number is right."
+        }
       ],
-      "relatedProjects": ["stackgen-cli"]
+      "relatedProjects": [
+        "snowflake-dbt-analytics-pipeline"
+      ]
     }
   ]
 }

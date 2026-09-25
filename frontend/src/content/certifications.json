@@ -1,13 +1,9 @@
 {
-  "note": "Certification level, date and credential ID are placeholders — confirm before publishing.",
   "certifications": [
     {
-      "name": "Databricks Certified Data Engineer — Associate",
+      "name": "Databricks Certified Data Engineer \u2014 Associate",
       "issuer": "Databricks",
-      "date": "[Month Year]",
-      "credentialId": "[Credential ID]",
-      "verifyUrl": "",
-      "note": "Confirm exact certification level before publishing."
+      "verifyUrl": "https://credentials.databricks.com/d9a3e90d-ea80-4b86-b7e2-4b2c981eed26#acc.dgFG2Z6c"
     }
   ]
 }
