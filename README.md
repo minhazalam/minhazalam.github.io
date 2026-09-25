@@ -25,4 +25,4 @@ The `Deploy to GitHub Pages` workflow builds and publishes the React app to [min
 
 The `/recruiter` view is a short introduction to skills, selected repositories, and verified credentials. The notes page links to the preparation repository; generated sample articles are not published. Keep future notes in your own words in that repository, then curate a few for the site.
 
-The `codex/minimal-redesign` branch deploys a design preview under `/preview/`; the production homepage remains built from `main`.
+The `feature/data-pipeline-design` branch deploys a design preview under `/preview/`; the production homepage remains built from `main`.

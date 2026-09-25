@@ -21,6 +21,6 @@ Writing format: each article is an object in `articles`. Supported body blocks a
 
 The `/recruiter` page is a compact overview of skills, selected GitHub projects, and verified certification. The writing index is intentionally empty until personal notes are ready. Keep full notes in the preparation repository and feature only a few selected notes on the site.
 
-The design preview is built from the `codex/minimal-redesign` branch and published at `/preview/`. The production root is built from `main`.
+The design preview is built from the `feature/data-pipeline-design` branch and published at `/preview/`. The production root is built from `main`.
 
 The GitHub Pages workflow runs on pushes to `main` and deploys the production build.
