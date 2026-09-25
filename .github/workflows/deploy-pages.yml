@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main, feature/data-pipeline-design]
+  schedule:
+    - cron: "23 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -26,6 +28,11 @@ jobs:
         with:
           ref: feature/data-pipeline-design
           path: preview
+      - uses: actions/checkout@v4
+        with:
+          repository: minhazalam/data-engineering-interview-prep
+          ref: main
+          path: notes-source
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -34,7 +41,8 @@ jobs:
       - name: Build production site from main
         working-directory: production/frontend
         env:
-          PUBLIC_URL: .
+          PUBLIC_URL: /
+          NOTES_REPO_PATH: ${{ github.workspace }}/notes-source
         run: |
           corepack yarn install --frozen-lockfile
           corepack yarn build
@@ -43,6 +51,8 @@ jobs:
         env:
           PUBLIC_URL: /preview
           REACT_APP_DEPLOY_TARGET: preview
+          REACT_APP_BASE_PATH: /preview
+          NOTES_REPO_PATH: ${{ github.workspace }}/notes-source
         run: |
           corepack yarn install --frozen-lockfile
           corepack yarn build

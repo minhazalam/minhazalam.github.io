@@ -61,6 +61,20 @@
 .output-link:hover { color: #e7ece8; }
 .pipeline-footer { border-top: 1px solid hsl(var(--border)); background: #0d100e; }
 
+.note-prose { color: #b9c3bc; font-size: 0.95rem; line-height: 1.85; }
+.note-prose > * + * { margin-top: 1.15rem; }
+.note-prose .note-heading { margin-top: 2.5rem; color: #e7ece8; font-family: "IBM Plex Sans", sans-serif; font-size: 1.35rem; font-weight: 600; line-height: 1.35; }
+.note-prose .note-list { margin-left: 1.25rem; list-style: disc; }
+.note-prose ol.note-list { list-style: decimal; }
+.note-prose .note-list li + li { margin-top: 0.4rem; padding-left: 0.25rem; }
+.note-prose .note-quote { border-left: 2px solid #78cbb2; padding-left: 1rem; color: #d4ddd7; }
+.note-prose .note-inline-code { border: 1px solid hsl(var(--border)); border-radius: 3px; background: #171c19; padding: 0.1rem 0.35rem; color: #9bd9c6; font: 0.86em "IBM Plex Mono", monospace; }
+.note-prose .note-table-wrap { overflow-x: auto; border: 1px solid hsl(var(--border)); border-radius: 4px; }
+.note-prose .note-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.note-prose .note-table th, .note-prose .note-table td { min-width: 8rem; border-bottom: 1px solid hsl(var(--border)); padding: 0.7rem 0.85rem; text-align: left; vertical-align: top; }
+.note-prose .note-table th { color: #e7ece8; font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; font-weight: 500; }
+.note-prose .note-table tr:last-child td { border-bottom: 0; }
+
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #101311; }
 ::-webkit-scrollbar-thumb { border: 2px solid #101311; border-radius: 8px; background: #34423b; }

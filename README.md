@@ -23,6 +23,25 @@ GitHub Pages deploys the production site from `main` to [minhazalam.github.io](h
 - `frontend/src/content/experience.json` — role summary.
 - `frontend/src/content/certifications.json` — credential names and verification links.
 
+## Selected writing
+
+The `/writing` page publishes only Markdown notes explicitly listed in `frontend/src/content/writing.json`. Note bodies stay in the public `data-engineering-interview-prep` repository; the Pages workflow checks out that repository, copies only allowlisted files during the build, and creates static routes for each published note. A daily scheduled build refreshes those selected files. Adding or removing a note requires updating the portfolio manifest and deploying that change. The page stays empty until a note is deliberately selected.
+
+To publish a note, add an entry with a unique URL slug and its exact path in the prep repository, for example:
+
+```json
+{
+  "slug": "spark-skew",
+  "title": "Handling skew in Spark joins",
+  "summary": "A concise summary of the production scenario.",
+  "topic": "Spark",
+  "date": "2026-09-26",
+  "sourceFile": "production-scenarios/spark/skew.md"
+}
+```
+
+Keep the note itself in the prep repository. The source repository remains the canonical place to edit it.
+
 Keep the portfolio selective. Project architecture belongs on the project card only when the stages can be verified from that repository's own documentation. Personal notes remain in the interview preparation repository; the portfolio does not crawl or publish them automatically.
 
 ## Privacy

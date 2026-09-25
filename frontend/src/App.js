@@ -1,9 +1,13 @@
 import "@/App.css";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ContentProvider, useContent } from "@/context/ContentContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
+import Writing from "@/pages/Writing";
+import ArticleDetail from "@/pages/ArticleDetail";
+import NotFound from "@/pages/NotFound";
 
 function ContentGate({ children }) {
   const { loading, error, content, reload } = useContent();
@@ -34,7 +38,12 @@ function Shell() {
         <div className="fixed right-4 top-20 z-40 rounded-full border border-accent/30 bg-background px-3 py-1 font-mono text-[10px] tracking-wider text-accent">DESIGN PREVIEW</div>
       )}
       <Navbar />
-      <Home />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/writing" element={<Writing />} />
+        <Route path="/writing/:slug" element={<ArticleDetail />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <Footer />
     </div>
   );
@@ -43,9 +52,11 @@ function Shell() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <ContentProvider>
-        <ContentGate><Shell /></ContentGate>
-      </ContentProvider>
+      <BrowserRouter basename={process.env.REACT_APP_BASE_PATH || undefined}>
+        <ContentProvider>
+          <ContentGate><Shell /></ContentGate>
+        </ContentProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   );
 }
